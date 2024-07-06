@@ -3,3 +3,5 @@
 // * although it takes a bit of code but it's worth right
 
 export * from './auth.dto';
+export * from './login.dto';
+export * from './signup.dto';

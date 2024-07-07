@@ -10,10 +10,16 @@ import { hash, verify } from 'argon2';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LoginDTO, SignupDTO } from './dto';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable({})
 export class AuthService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private jwt: JwtService,
+    private config: ConfigService,
+  ) {}
   async login({ email, password }: LoginDTO) {
     const user = await this.prisma.user.findUnique({
       where: {
@@ -30,10 +36,21 @@ export class AuthService {
     // * now we do some dirty way to filter the fields we want to return but later on we will use the way with class transformer to do it
     // * we can also use select option in query of prisma but it's really suite for when we want to read data so select data right, of course in this case we're reading but we need to use password later to verify login password right so therefore we need to do it like it
     // * but it's better if we do with class transformer
-    delete user.password;
-    delete user.passwordConfirm;
+    // delete user.password;
+    // delete user.passwordConfirm;
 
-    return user;
+    // const payload = {
+    //   sub: user.id,
+    //   email,
+    // };
+
+    // const token = await this.jwt.signAsync(payload, {
+    //   secret: this.config.get('JWT_ACCESS_TOKEN_SECRET'),
+    //   expiresIn: this.config.get('JWT_ACCESS_TOKEN_EXPIRES'),
+    // });
+
+    // return token;
+    return this.signToken({ sub: user.id, email });
   }
 
   async signup({ email, password }: SignupDTO) {
@@ -48,10 +65,11 @@ export class AuthService {
 
       // * now we do some dirty way to filter the fields we want to return but later on we will use the way with class transformer to do it
       // * we can also use select option in query of prisma but it's really suite for when we want to read data so select data right
-      delete newUser.password;
-      delete newUser.passwordConfirm;
+      // delete newUser.password;
+      // delete newUser.passwordConfirm;
 
-      return newUser;
+      // return newUser;
+      return this.signToken({ sub: newUser.id, email });
     } catch (err) {
       if (err instanceof PrismaClientKnownRequestError)
         if (err.code === 'P2002')
@@ -59,5 +77,14 @@ export class AuthService {
 
       throw err;
     }
+  }
+
+  async signToken(payload: { sub: number; email: string }) {
+    const token = await this.jwt.signAsync(payload, {
+      secret: this.config.get('JWT_ACCESS_TOKEN_SECRET'),
+      expiresIn: this.config.get('JWT_ACCESS_TOKEN_EXPIRES'),
+    });
+
+    return { status: 'success', token };
   }
 }

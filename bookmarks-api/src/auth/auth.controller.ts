@@ -1,11 +1,11 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 // import { Request } from 'express';
 import { LoginDTO, SignupDTO } from './dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private AuthService: AuthService) {}
+  constructor(private authService: AuthService) {}
 
   // ! we shouldn't use @Req like this why because when we use this we need to import the type of request from the framework underlying so in this case that's express and the request is the request object of express
   // ? but what if we use another framework, what if our app will change the framework underlying instead of express
@@ -30,12 +30,17 @@ export class AuthController {
   //     dto,
   //   });
   // }
+  // * so by default in nestjs the post method protocol send the status code is 201 but sometime we have the cases we use post method but it's not create new value right so therefore we want to custom it
+  // * so in this case login doesn't create new value so we can custom it by use @HttpCode decorator, of course we can use @Res decorator but it's like problem of the @Req decorator right
+  // @HttpCode(200)
+  // * and we can use HttpStatus object from nestjs to see the status we want to use and it will return the status code for use in case we don't remember the status code right and maybe it will make the code more readable
+  @HttpCode(HttpStatus.OK)
   login(@Body() dto: LoginDTO) {
-    return this.AuthService.login(dto);
+    return this.authService.login(dto);
   }
 
   @Post('signup')
   signup(@Body() dto: SignupDTO) {
-    return this.AuthService.signup(dto);
+    return this.authService.signup(dto);
   }
 }

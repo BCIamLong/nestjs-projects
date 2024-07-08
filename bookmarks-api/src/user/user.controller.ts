@@ -1,5 +1,7 @@
-import { Controller, Get, Req, UseGuards } from '@nestjs/common';
-import { Request } from 'express';
+import { Controller, Get, UseGuards } from '@nestjs/common';
+import { User } from '@prisma/client';
+// import { Request } from 'express';
+import { GetUser } from 'src/auth/decorators';
 import { JWTGuard } from 'src/auth/guards';
 // import { AuthGuard } from '@nestjs/passport';
 
@@ -14,11 +16,17 @@ export class UserController {
   // * and use this class like this with this way it's more specific and more readable easy to understand right
   @UseGuards(JWTGuard)
   @Get('me')
-  getMe(@Req() req: Request) {
+  // ? we need to solve this problem so the @Req decorator because remember this can be problem because nestjs under the hood can use different http server library right like express, fastify... and maybe in the future it will change another
+  // * therefore to make sure it always work we shouldn't use @Req but instead we can custom the @Req decorator (we can custom param decorators)
+  // getMe(@Req() req: Request) {
+  // getMe(@GetUser('email') email: string) {
+  getMe(@GetUser() user: User) {
     // return 'Current user';
 
     // * we can use this req.user because after we login or signup we validate the token and we will take the payload and fetch the user and return the user data
     // * which is will be assign to the req.user right so now we can use this req.user data
-    return req.user;
+    // return req.user;
+    // return email
+    return user;
   }
 }

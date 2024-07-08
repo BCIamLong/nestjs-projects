@@ -23,6 +23,10 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  bookmarks Bookmark[]
+
+  // @@map("users") //* we can use this to change the name of the table in our DB
+  // * because we declare model User => name of table is User
 }
 
 model Bookmark{
@@ -32,4 +36,9 @@ model Bookmark{
   link String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  userId Int
+  user User @relation(fields: [userId], references: [id])
+
+  // @@map("bookmarks") //* we can use this to change the name of the table in our DB
 }

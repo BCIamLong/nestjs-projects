@@ -2,6 +2,7 @@ import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 // import { Request } from 'express';
 import { LoginDTO, SignupDTO } from './dto';
+import { SkipGlobalInterceptor } from 'src/common/decorators';
 
 @Controller('auth')
 export class AuthController {
@@ -15,7 +16,7 @@ export class AuthController {
   //   console.log(req.body);
   //   return this.AuthService.login();
   // }
-
+  @SkipGlobalInterceptor()
   // * therefore we use use @Body decorator which is allow us access to the body of the request (flexible and access to any framework underlying, if the framework change it's not problem)
   @Post('login')
   // ? but how we can validate in nestjs, maybe we can use if else, guard clause to check but it's not good enough right instead we use something in nestjs called pipes
@@ -39,6 +40,7 @@ export class AuthController {
     return this.authService.login(dto);
   }
 
+  @SkipGlobalInterceptor()
   @Post('signup')
   signup(@Body() dto: SignupDTO) {
     return this.authService.signup(dto);

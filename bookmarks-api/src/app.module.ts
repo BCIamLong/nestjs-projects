@@ -6,6 +6,8 @@ import { UserModule } from './user/user.module';
 import { BookmarkModule } from './bookmark/bookmark.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { ResponseInterceptor } from './common/interceptors';
 
 @Module({
   imports: [
@@ -19,6 +21,11 @@ import { ConfigModule } from '@nestjs/config';
     }),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    // * we can use interceptor in the just for app module so include all the modules in our app like this
+    { provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },
+    // * for global interceptor use in main.ts we use use it for like logger or maybe if we have more service and not only our app and we have interceptors for that then we can apply global as i did before right
+  ],
 })
 export class AppModule {}

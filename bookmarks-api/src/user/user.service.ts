@@ -22,6 +22,6 @@ export class UserService {
     // delete updatedUser.passwordConfirm;
     // * we can also use select in query to filter the fields we want
 
-    return updatedUser;
+    return { user: updatedUser };
   }
 }

@@ -28,7 +28,9 @@ export class AuthController {
   // }
   @SkipGlobalInterceptor()
   // * therefore we use use @Body decorator which is allow us access to the body of the request (flexible and access to any framework underlying, if the framework change it's not problem)
-  @Post('login')
+  @Post('local/login')
+  // ! we should use local/login because later on we might have login with google, facebook.... and it will be google/login, facebook/login... right and it makes our code more organization
+  // ! https://docs.google.com/document/d/1fVpBFz4gzIAC8h-YgdMUuBVdOJpyIVUU_3RGLVDW7Ck/edit read this
   // ? but how we can validate in nestjs, maybe we can use if else, guard clause to check but it's not good enough right instead we use something in nestjs called pipes
   // login(
   // * we can do it like this by manually way but it's not good right because we need to write and declare these pipes in every our route our controller function right so everywhere we want to use the pipes right

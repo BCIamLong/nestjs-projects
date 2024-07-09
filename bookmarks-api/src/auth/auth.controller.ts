@@ -1,8 +1,18 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  // UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 // import { Request } from 'express';
 import { LoginDTO, SignupDTO } from './dto';
 import { SkipGlobalInterceptor } from 'src/common/decorators';
+// import { LocalGuard } from './guards';
+// import { GetUser } from './decorators';
+// import { User } from '@prisma/client';
 
 @Controller('auth')
 export class AuthController {
@@ -36,6 +46,12 @@ export class AuthController {
   // @HttpCode(200)
   // * and we can use HttpStatus object from nestjs to see the status we want to use and it will return the status code for use in case we don't remember the status code right and maybe it will make the code more readable
   @HttpCode(HttpStatus.OK)
+  // @UseGuards(LocalGuard)
+  // login(@GetUser() user: User) {
+  // ! we will use LocalGuard in case we want to login with username
+  // * basically we extract the login to this local strategy and then just get the user and do something like just return the token
+  //   return this.authService.signToken({sub: user.id, email: user.email});
+  // }
   login(@Body() dto: LoginDTO) {
     return this.authService.login(dto);
   }

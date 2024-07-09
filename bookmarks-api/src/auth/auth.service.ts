@@ -8,7 +8,7 @@ import {
 import { hash, verify } from 'argon2';
 
 import { PrismaService } from 'src/prisma/prisma.service';
-import { LoginDTO, SignupDTO } from './dto';
+import { LoginDTO, SignupDTO, ValidateDTO } from './dto';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -86,5 +86,30 @@ export class AuthService {
     });
 
     return { status: 'success', token };
+  }
+
+  // * only use when we want to use local strategy so login with username now we don't have username so just use the first name for that
+  async validateUser({ username, password }: ValidateDTO) {
+    // const user = await this.prisma.user.findUnique({
+    //   where: {
+    //     name: username,
+    //   },
+    // });
+    // ! remember we use findUnique because now i just  use name for replacement of the username so username is unique and we can use findUnique but name is not so let's just use find first instead
+    // ! and later on if we want to use this function we will change to use
+    const user = await this.prisma.user.findFirst({
+      where: {
+        name: username,
+      },
+    });
+
+    if (!user) throw new NotFoundException('User is not exist');
+
+    const verifyLogin = await verify(user.password, password);
+
+    if (!verifyLogin) throw new BadRequestException('Password is invalid');
+
+    // return user;
+    return user;
   }
 }

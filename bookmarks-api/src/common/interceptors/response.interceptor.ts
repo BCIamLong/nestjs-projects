@@ -16,14 +16,15 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, any> {
       'skipGlobalInterceptor',
       context.getHandler(),
     );
-    if (skip) {
-      return next.handle();
-    }
+    if (skip) return next.handle();
 
     return next.handle().pipe(
       map((data) => ({
         status: 'success',
         data,
+        // data: {
+        //   data, //* not work it will because data: {user_id: 123 ....} we should use format return {users}, {user}... so with an object include the field name we want to return
+        // },
       })),
     );
   }

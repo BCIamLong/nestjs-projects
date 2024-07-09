@@ -6,6 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+    "prisma:ui": "npx prisma studio",
     "prisma:dev:deploy": "npx prisma deploy",
     "prisma:dev:migration": "npx prisma migrate dev",
     "build": "nest build",

@@ -10,12 +10,17 @@ export class BookmarkService {
   async getBookmarks() {
     const bookmarks = await this.prisma.bookmark.findMany();
 
-    return {
-      status: 'success',
-      data: {
-        bookmarks,
-      },
-    };
+    // * because i use the global response interceptor and it will format the response object for us
+    // * and then we just return this object with the data like this
+    // * https://docs.nestjs.com/interceptors
+    // * https://docs.google.com/document/d/15wEC1b4LLGgWbWx-_N4ZwkEoKKXdorFr10woLPUdV_A/edit
+    return { bookmarks };
+    // return {
+    //   status: 'success',
+    //   data: {
+    //     bookmarks,
+    //   },
+    // };
   }
 
   async getBookmark(id: number) {
@@ -28,12 +33,13 @@ export class BookmarkService {
     if (!bookmark)
       throw new NotFoundException('No bookmarks found with this id');
 
-    return {
-      status: 'success',
-      data: {
-        bookmark,
-      },
-    };
+    return { bookmark };
+    // return {
+    //   status: 'success',
+    //   data: {
+    //     bookmark,
+    //   },
+    // };
   }
 
   async createBookmark(dto: CreateBookmark) {
@@ -41,12 +47,13 @@ export class BookmarkService {
       data: dto,
     });
 
-    return {
-      status: 'success',
-      data: {
-        bookmark: newBookmark,
-      },
-    };
+    return { bookmark: newBookmark };
+    // return {
+    //   status: 'success',
+    //   data: {
+    //     bookmark: newBookmark,
+    //   },
+    // };
   }
 
   async updateBookmark(id: number, dto: UpdateBookmark) {
@@ -58,12 +65,13 @@ export class BookmarkService {
         data: dto,
       });
 
-      return {
-        status: 'success',
-        data: {
-          bookmark: updatedBookmark,
-        },
-      };
+      return { bookmark: updatedBookmark };
+      // return {
+      //   status: 'success',
+      //   data: {
+      //     bookmark: updatedBookmark,
+      //   },
+      // };
     } catch (err) {
       if (err instanceof PrismaClientKnownRequestError) {
         // ! notice it's throw error, not return because when we return it's response right so that the pattern of nestjs we should follow
@@ -86,10 +94,11 @@ export class BookmarkService {
         },
       });
 
-      return {
-        status: 'success',
-        data: null,
-      };
+      return null;
+      // return {
+      //   status: 'success',
+      //   data: null,
+      // };
     } catch (err) {
       if (err instanceof PrismaClientKnownRequestError) {
         if (err.code === 'P2025')

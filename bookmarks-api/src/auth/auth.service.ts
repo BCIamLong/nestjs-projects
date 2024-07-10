@@ -50,7 +50,7 @@ export class AuthService {
     // });
 
     // return token;
-    return this.signToken({ sub: user.id, email });
+    return this.signToken('access-token', { sub: user.id, email });
   }
 
   async signup({ email, password }: SignupDTO) {
@@ -69,7 +69,7 @@ export class AuthService {
       // delete newUser.passwordConfirm;
 
       // return newUser;
-      return this.signToken({ sub: newUser.id, email });
+      return this.signToken('access-token', { sub: newUser.id, email });
     } catch (err) {
       if (err instanceof PrismaClientKnownRequestError)
         if (err.code === 'P2002')
@@ -79,11 +79,22 @@ export class AuthService {
     }
   }
 
-  async signToken(payload: { sub: number; email: string }) {
-    const token = await this.jwt.signAsync(payload, {
-      secret: this.config.get('JWT_ACCESS_TOKEN_SECRET'),
-      expiresIn: this.config.get('JWT_ACCESS_TOKEN_EXPIRES'),
-    });
+  async signToken(
+    type: 'access-token' | 'refresh-token',
+    payload: { sub: number; email: string },
+  ) {
+    const tokenPromise =
+      type === 'access-token'
+        ? this.jwt.signAsync(payload, {
+            secret: this.config.get('JWT_ACCESS_TOKEN_SECRET'),
+            expiresIn: this.config.get('JWT_ACCESS_TOKEN_EXPIRES'),
+          })
+        : this.jwt.signAsync(payload, {
+            secret: this.config.get('JWT_REFRESH_TOKEN_SECRET'),
+            expiresIn: this.config.get('JWT_REFRESH_TOKEN_EXPIRES'),
+          });
+
+    const token = await tokenPromise;
 
     return { status: 'success', token };
   }
@@ -112,4 +123,8 @@ export class AuthService {
     // return user;
     return user;
   }
+
+  async logout() {}
+
+  async refresh() {}
 }

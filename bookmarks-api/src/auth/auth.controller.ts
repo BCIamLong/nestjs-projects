@@ -5,12 +5,15 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  UseGuards,
   // UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 // import { Request } from 'express';
 import { LoginDTO, SignupDTO } from './dto';
 import { PublicRoute, SkipGlobalInterceptor } from 'src/common/decorators';
+import { GetRefreshToken, GetUser } from './decorators';
+import { RefreshTokenGuard } from './guards';
 // import { LocalGuard } from './guards';
 // import { GetUser } from './decorators';
 // import { User } from '@prisma/client';
@@ -60,10 +63,12 @@ export class AuthController {
     return this.authService.login(dto);
   }
 
+  @SkipGlobalInterceptor()
   @PublicRoute()
   @Post('local/login1')
-  login1() {
+  login1(@Body() dto: LoginDTO) {
     // * this for test access token and refresh token way
+    return this.authService.login1(dto);
   }
 
   @PublicRoute()
@@ -74,12 +79,15 @@ export class AuthController {
   }
 
   @Get('logout')
-  logout() {
-    return this.authService.logout();
+  logout(@GetUser('id') id: number) {
+    return this.authService.logout(id);
   }
 
+  @PublicRoute()
+  @UseGuards(RefreshTokenGuard)
+  @SkipGlobalInterceptor()
   @Get('refresh')
-  refresh() {
-    return this.authService.refresh();
+  refresh(@GetUser('sub') id: number, @GetRefreshToken() refreshToken: string) {
+    return this.authService.refresh(id, refreshToken);
   }
 }

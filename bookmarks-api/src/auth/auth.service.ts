@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 
 import { hash, verify } from 'argon2';
@@ -124,9 +125,103 @@ export class AuthService {
     return user;
   }
 
-  async login1() {}
+  async login1({ email, password }: LoginDTO) {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: {
+          email,
+        },
+      });
 
-  async logout() {}
+      if (!user) throw new NotFoundException('User is not exist');
 
-  async refresh() {}
+      const verifyLogin = await verify(user.password, password);
+
+      if (!verifyLogin) throw new BadRequestException('Password is invalid');
+
+      // * create access token and refresh token
+      const accessTokenObj = await this.signToken('access-token', {
+        sub: user.id,
+        email,
+      });
+
+      const refreshTokenObj = await this.signToken('refresh-token', {
+        sub: user.id,
+        email,
+      });
+
+      // * set these tokens to cookie
+
+      // * hash refresh token and store in the DB by update hashedRt field on the user
+      const hashedRt = await hash(refreshTokenObj.token);
+
+      await this.prisma.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          hashedRt,
+        },
+      });
+
+      // * return response only include the access token
+
+      return { accessTokenObj, refreshTokenObj };
+      // return accessTokenObj;
+    } catch (err) {
+      if (err instanceof PrismaClientKnownRequestError) {
+        if (err.code === 'P2025')
+          throw new UnauthorizedException('Access denied');
+      }
+    }
+  }
+
+  async logout(id: number) {
+    try {
+      await this.prisma.user.update({
+        where: {
+          id,
+        },
+        data: {
+          hashedRt: null,
+        },
+      });
+    } catch (err) {
+      if (err instanceof PrismaClientKnownRequestError) {
+        if (err.code === 'P2025')
+          throw new UnauthorizedException('Access denied');
+      }
+    }
+  }
+
+  async refresh(id: number, refreshToken: string) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!user) throw new UnauthorizedException('Access denied');
+
+    const verifyRefreshToken = await verify(user.hashedRt, refreshToken);
+
+    if (!verifyRefreshToken) throw new UnauthorizedException('Access denied');
+
+    const decoded = await this.jwt.decode(refreshToken);
+
+    // console.log(decoded.exp * 1000, Date.now());
+    // decoded.exp (s) => we need to time 1000 to make it as ms as the unit of Date.now()
+    if (decoded.exp * 1000 < Date.now())
+      throw new UnauthorizedException('Access denied');
+    // console.log(decoded); // = { sub: 5, email: 'b@gmail.com', iat: 1720603503, exp: 1721208303 }
+
+    const accessTokenObj = await this.signToken('access-token', {
+      sub: id,
+      email: user.email,
+    });
+
+    // * set access token to cookie
+
+    return accessTokenObj;
+  }
 }

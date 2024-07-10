@@ -7,7 +7,7 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class RefreshTokenJWTStrategy extends PassportStrategy(
   Strategy,
-  'access-token-jwt',
+  'refresh-token-jwt',
 ) {
   constructor(config: ConfigService) {
     super({

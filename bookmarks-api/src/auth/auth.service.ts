@@ -124,6 +124,8 @@ export class AuthService {
     return user;
   }
 
+  async login1() {}
+
   async logout() {}
 
   async refresh() {}

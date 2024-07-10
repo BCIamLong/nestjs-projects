@@ -23,6 +23,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  hashedRt String?
+
   bookmarks Bookmark[]
 
   // @@map("users") //* we can use this to change the name of the table in our DB

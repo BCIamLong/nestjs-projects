@@ -10,7 +10,7 @@ import {
 import { AuthService } from './auth.service';
 // import { Request } from 'express';
 import { LoginDTO, SignupDTO } from './dto';
-import { SkipGlobalInterceptor } from 'src/common/decorators';
+import { PublicRoute, SkipGlobalInterceptor } from 'src/common/decorators';
 // import { LocalGuard } from './guards';
 // import { GetUser } from './decorators';
 // import { User } from '@prisma/client';
@@ -55,10 +55,18 @@ export class AuthController {
   // * basically we extract the login to this local strategy and then just get the user and do something like just return the token
   //   return this.authService.signToken({sub: user.id, email: user.email});
   // }
+  @PublicRoute()
   login(@Body() dto: LoginDTO) {
     return this.authService.login(dto);
   }
 
+  @PublicRoute()
+  @Post('local/login1')
+  login1() {
+    // * this for test access token and refresh token way
+  }
+
+  @PublicRoute()
   @SkipGlobalInterceptor()
   @Post('signup')
   signup(@Body() dto: SignupDTO) {

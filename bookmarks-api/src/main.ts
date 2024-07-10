@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import { AppModule } from './app.module';
 // import { AccessTokenGuard } from './auth/guards';
 // import { ResponseInterceptor } from './common/interceptors';
 

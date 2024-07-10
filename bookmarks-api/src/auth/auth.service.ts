@@ -201,7 +201,9 @@ export class AuthService {
       },
     });
 
-    if (!user) throw new UnauthorizedException('Access denied');
+    if (!user || !user.hashedRt)
+      //* we also don't allow the user doesn't have hashedRt to pass right and user must to login again to have the hashedRt right
+      throw new UnauthorizedException('Access denied');
 
     const verifyRefreshToken = await verify(user.hashedRt, refreshToken);
 

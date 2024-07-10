@@ -5,8 +5,13 @@ import { GetUser } from 'src/auth/decorators';
 import { JWTGuard } from 'src/auth/guards';
 import { UserService } from './user.service';
 import { UpdateMe } from './dto';
+import { Roles } from 'src/common/decorators';
+import { Role } from 'src/common/enums';
+import { RolesGuard } from 'src/common/guards';
 // import { AuthGuard } from '@nestjs/passport';
 
+@Roles(Role.ADMIN, Role.MANAGER)
+@UseGuards(RolesGuard)
 @UseGuards(JWTGuard)
 @Controller('users')
 export class UserController {

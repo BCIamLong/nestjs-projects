@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+// import { AccessTokenGuard } from './auth/guards';
 // import { ResponseInterceptor } from './common/interceptors';
 
 async function bootstrap() {
@@ -11,6 +12,8 @@ async function bootstrap() {
   // * notice that if we use as interceptor as global and in that interceptor we have used Reflector provider then we need to provide it like the code bellow
   // * if we use it as in the App module then we don't need instead we follow the way to provide the interceptor and this Reflector is automatically apply for app module
   // app.useGlobalInterceptors(new ResponseInterceptor(new Reflector()));
+
+  // app.useGlobalGuards(new AccessTokenGuard(new Reflector()));
 
   app.useGlobalPipes(
     new ValidationPipe({

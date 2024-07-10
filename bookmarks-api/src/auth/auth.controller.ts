@@ -78,6 +78,13 @@ export class AuthController {
     return this.authService.signup(dto);
   }
 
+  // * the idea of refresh token is just:
+  // * 1, we have routes refresh, login, signup, logout
+  // * 2, when we login or signup we will create the access, refresh tokens and set them as cookie, hash refresh token and store in the DB, only return access token
+  // * 3, on the client we will take the tokens from cookie so if access-token is not here then just make the request to the /refresh route with refresh-token, after check if pass we update the new access-token and send it back and also set to the cookie
+  // * in that time user can access again, so basically if access-token expires we will send back to server and with refresh token to update the access-token then client use that access-token to access our app
+  // *4, logout will delete the refresh-token and access token cookies and also delete the hashed refresh token from our DB
+
   @Get('logout')
   logout(@GetUser('id') id: number) {
     return this.authService.logout(id);

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -11,6 +11,7 @@ import { ResponseInterceptor } from './common/interceptors';
 import { AccessTokenGuard } from './auth/guards';
 import { SharedModule } from './shared/shared.module';
 import { AllExceptionFilter } from './common/filters';
+import { LoggerMiddleware } from './common/middlewares';
 
 @Module({
   imports: [
@@ -40,4 +41,10 @@ import { AllExceptionFilter } from './common/filters';
     { provide: APP_FILTER, useClass: AllExceptionFilter },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    // * https://github.com/stuyy/nestjs-crash-course/blob/master/src/users/users.module.ts see more about how we can implement middleware
+    // * https://docs.nestjs.com/middleware
+    consumer.apply(LoggerMiddleware).forRoutes('users', 'bookmarks', 'auth');
+  }
+}

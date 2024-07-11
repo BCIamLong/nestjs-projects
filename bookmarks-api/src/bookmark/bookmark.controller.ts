@@ -12,6 +12,7 @@ import { BookmarkService } from './bookmark.service';
 import { CreateBookmark, UpdateBookmark } from './dto';
 import { PublicRoute } from 'src/common/decorators';
 import { BookmarkServiceTest } from './bookmark-test.service';
+import { ParseIntPipeCustom } from 'src/common/pipes';
 
 @Controller('bookmarks')
 export class BookmarkController {
@@ -31,7 +32,7 @@ export class BookmarkController {
   @Get(':id')
   // * in this case we just use param and it's one value right and we do not need to convert it to DTO so we just use the ParseIntPipe built-in pipe so it's good in this case right
   // * https://docs.google.com/document/d/1y9f8kwle4hT-2l7XoJyzPEGDZ8K26dueDZO0yZTuRHA/edit
-  getBookmark(@Param('id', ParseIntPipe) id: number) {
+  getBookmark(@Param('id', ParseIntPipeCustom) id: number) {
     return this.bookmarkTestService.findOne(id);
     // return this.bookmarkService.getBookmark(id);
   }

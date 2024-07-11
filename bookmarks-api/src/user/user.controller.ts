@@ -10,7 +10,8 @@ import { Role } from 'src/common/enums';
 import { RolesGuard } from 'src/common/guards';
 // import { AuthGuard } from '@nestjs/passport';
 
-@Roles(Role.ADMIN, Role.MANAGER)
+// @Roles(Role.ADMIN, Role.MANAGER) //* use for the RBAC way when we don't use access control
+@Roles(Role.ADMIN)
 @UseGuards(RolesGuard)
 @UseGuards(JWTGuard)
 @Controller('users')

@@ -9,6 +9,7 @@ import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ResponseInterceptor } from './common/interceptors';
 import { AccessTokenGuard } from './auth/guards';
+import { SharedModule } from './shared/shared.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AccessTokenGuard } from './auth/guards';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    SharedModule,
   ],
   controllers: [AppController],
   providers: [

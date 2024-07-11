@@ -6,10 +6,11 @@ import { UserModule } from './user/user.module';
 import { BookmarkModule } from './bookmark/bookmark.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
-import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ResponseInterceptor } from './common/interceptors';
 import { AccessTokenGuard } from './auth/guards';
 import { SharedModule } from './shared/shared.module';
+import { AllExceptionFilter } from './common/filters';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { SharedModule } from './shared/shared.module';
     { provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },
     // * for global interceptor use in main.ts we use use it for like logger or maybe if we have more service and not only our app and we have interceptors for that then we can apply global as i did before right
     { provide: APP_GUARD, useClass: AccessTokenGuard },
+    { provide: APP_FILTER, useClass: AllExceptionFilter },
   ],
 })
 export class AppModule {}

@@ -1,6 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+// import { HttpExceptionFilter } from './common/filters';
+// import { AllExceptionFilter } from './common/filters/all-exception.filter';
 // import { AccessTokenGuard } from './auth/guards';
 // import { ResponseInterceptor } from './common/interceptors';
 
@@ -24,6 +26,10 @@ async function bootstrap() {
       whitelist: true,
     }),
   );
+
+  // app.useGlobalFilters(new HttpExceptionFilter());
+  // app.useGlobalFilters(new AllExceptionFilter());
+
   await app.listen(3000);
 }
 bootstrap();

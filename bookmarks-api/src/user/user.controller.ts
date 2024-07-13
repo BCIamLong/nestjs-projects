@@ -8,8 +8,15 @@ import { UpdateMe } from './dto';
 import { Roles } from 'src/common/decorators';
 import { Role } from 'src/common/enums';
 import { RolesGuard } from 'src/common/guards';
+import {
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+  getSchemaPath,
+} from '@nestjs/swagger';
 // import { AuthGuard } from '@nestjs/passport';
 
+@ApiTags('users')
 // @Roles(Role.ADMIN, Role.MANAGER) //* use for the RBAC way when we don't use access control
 @UseGuards(RolesGuard)
 @UseGuards(JWTGuard)
@@ -25,6 +32,11 @@ export class UserController {
   // @UseGuards(AuthGuard('jwt'))
   // * and use this class like this with this way it's more specific and more readable easy to understand right
   // @UseGuards(JWTGuard)
+  @ApiOperation({ summary: 'get the current user' })
+  @ApiResponse({ status: 200, description: 'Success' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 500, description: 'Something went wrong' })
   @Get('me')
   // ? we need to solve this problem so the @Req decorator because remember this can be problem because nestjs under the hood can use different http server library right like express, fastify... and maybe in the future it will change another
   // * therefore to make sure it always work we shouldn't use @Req but instead we can custom the @Req decorator (we can custom param decorators)
@@ -43,6 +55,25 @@ export class UserController {
   // * so instead of make the @UseGuards(JWTGuard) in everywhere at level route we can put it at the level of controller and it will apply for all routes in this controller
   // * we also have global guard and we can use it for our entire app so entire routes in our app
   // @UseGuards(JWTGuard)
+  @ApiOperation({ summary: 'update the current user' })
+  @ApiResponse({
+    status: 200,
+    description: 'Success',
+    schema: {
+      properties: {
+        status: {
+          type: 'string',
+        },
+        data: {
+          $ref: getSchemaPath(UpdateMe),
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 500, description: 'Something went wrong' })
   @Patch('me')
   updateMe(@GetUser() user: User, @Body() dto: UpdateMe) {
     return this.userService.updateMe(user.id, dto);

@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 // import { HttpExceptionFilter } from './common/filters';
 // import { AllExceptionFilter } from './common/filters/all-exception.filter';
 // import { AccessTokenGuard } from './auth/guards';
@@ -29,6 +30,21 @@ async function bootstrap() {
 
   // app.useGlobalFilters(new HttpExceptionFilter());
   // app.useGlobalFilters(new AllExceptionFilter());
+
+  const config = new DocumentBuilder()
+    .setTitle('Bookmarks API')
+    .setDescription(
+      'The Bookmarks API help people can bookmark something they want',
+    )
+    .setVersion('1.0')
+    .addTag('Bookmarks API')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  // SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('api-doc', app, document, {
+    jsonDocumentUrl: 'api-doc/json',
+  });
 
   await app.listen(3000);
 }

@@ -14,10 +14,12 @@ import { LoginDTO, SignupDTO } from './dto';
 import { PublicRoute, SkipGlobalInterceptor } from 'src/common/decorators';
 import { GetRefreshToken, GetUser } from './decorators';
 import { RefreshTokenGuard } from './guards';
+import { ApiTags } from '@nestjs/swagger';
 // import { LocalGuard } from './guards';
 // import { GetUser } from './decorators';
 // import { User } from '@prisma/client';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}

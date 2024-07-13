@@ -65,6 +65,10 @@ describe('BookmarkController', () => {
     bookmarkService = app.get<BookmarkService>(BookmarkService);
   });
 
+  it('should be defined', () => {
+    expect(bookmarkController).toBeDefined();
+  });
+
   describe('getBookmarks', () => {
     describe('the bookmarks data is in DB', () => {
       it('should return a list of bookmarks', async () => {

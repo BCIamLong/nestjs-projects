@@ -30,8 +30,8 @@ export class JWTStrategy extends PassportStrategy(Strategy, 'jwt') {
       },
     });
 
-    delete user.password;
-    delete user.passwordConfirm;
+    delete user?.password;
+    delete user?.passwordConfirm;
 
     //* because this validate function will take the payload and do something to assign the user to the request object of our app
     // * therefore we can get the user and filter the sensitive and unwanted fields then return the user right and this will assign to the req object

@@ -11,9 +11,9 @@ import { RolesGuard } from 'src/common/guards';
 // import { AuthGuard } from '@nestjs/passport';
 
 // @Roles(Role.ADMIN, Role.MANAGER) //* use for the RBAC way when we don't use access control
-@Roles(Role.ADMIN)
 @UseGuards(RolesGuard)
 @UseGuards(JWTGuard)
+@Roles(Role.ADMIN)
 @Controller('users')
 export class UserController {
   constructor(private userService: UserService) {}

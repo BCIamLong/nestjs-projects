@@ -6,11 +6,13 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   Type,
 } from '@nestjs/common';
 import { BaseService } from './base.service';
 import { ApiResult } from 'src/common/decorators';
 import { ApiBody } from '@nestjs/swagger';
+import { Pagination } from 'src/common/dto';
 
 export function ControllerFactory(
   entityDto: Type,
@@ -26,8 +28,8 @@ export function ControllerFactory(
 
     @ApiResult(entityDto, `${modelName}`, 'getAll')
     @Get()
-    findAll() {
-      return this.baseService.findAll();
+    findAll(@Query() query: Pagination) {
+      return this.baseService.findAll(query);
     }
 
     @ApiResult(entityDto, `${modelName}`, 'getOne')

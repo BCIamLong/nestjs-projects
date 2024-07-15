@@ -2,8 +2,9 @@ import { Bookmark } from '@prisma/client';
 import { BaseController } from 'src/common/helpers';
 import { CreateBookmark, UpdateBookmark } from './dto';
 import { BookmarkServiceTest } from './bookmark-test.service';
-import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { PublicRoute } from 'src/common/decorators';
+import { Pagination } from 'src/common/dto';
 // import { Reflector } from '@nestjs/core';
 
 @Controller('bookmarks-test')
@@ -20,8 +21,9 @@ export class BookmarkTestController extends BaseController<
 
   @PublicRoute()
   @Get()
-  findAll() {
-    return super.findAll();
+  findAll(@Query() query: Pagination) {
+    // console.log(query);
+    return super.findAll(query);
   }
 
   @PublicRoute()

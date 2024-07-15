@@ -2,8 +2,9 @@ import { Bookmark } from '@prisma/client';
 import { ControllerFactory } from 'src/common/helpers';
 import { BookmarkDTO, CreateBookmark, UpdateBookmark } from './dto';
 import { BookmarkServiceTest } from './bookmark-test.service';
-import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { ApiResult, PublicRoute } from 'src/common/decorators';
+import { Pagination } from 'src/common/dto';
 // import { Reflector } from '@nestjs/core';
 
 // * with this use base controller function factory we will able to more flexible in this case we can use it easy to integrate the api doc with swagger
@@ -26,8 +27,8 @@ export class BookmarkTestBaseFuncController extends ControllerFactory(
   @ApiResult(BookmarkDTO, 'bookmark', 'getAll')
   @PublicRoute()
   @Get()
-  findAll() {
-    return super.findAll();
+  findAll(@Query() query: Pagination) {
+    return super.findAll(query);
   }
 
   @ApiResult(BookmarkDTO, 'bookmark', 'getOne')

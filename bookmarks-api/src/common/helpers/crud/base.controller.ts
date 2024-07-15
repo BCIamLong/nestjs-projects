@@ -6,8 +6,10 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { BaseService } from './base.service';
+import { Pagination } from 'src/common/dto';
 // import { Reflector } from '@nestjs/core';
 
 // ? how we can tell this base class what is the route we should use public route and also use other decorators like Roles...
@@ -23,8 +25,8 @@ export class BaseController<Model, CreateDTO, UpdateDTO> {
   ) {}
 
   @Get()
-  findAll() {
-    return this.baseService.findAll();
+  findAll(@Query() query: Pagination) {
+    return this.baseService.findAll(query);
   }
 
   @Get(':id')

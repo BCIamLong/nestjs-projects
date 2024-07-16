@@ -5,13 +5,18 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { BookmarkModule } from './bookmark/bookmark.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ResponseInterceptor } from './common/interceptors';
 import { AccessTokenGuard } from './auth/guards';
 import { SharedModule } from './shared/shared.module';
 import { AllExceptionFilter } from './common/filters';
 import { LoggerMiddleware } from './common/middlewares';
+import {
+  ThrottlerGuard,
+  ThrottlerModule,
+  ThrottlerModuleOptions,
+} from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -24,9 +29,38 @@ import { LoggerMiddleware } from './common/middlewares';
       isGlobal: true,
     }),
     SharedModule,
+    // ThrottlerModule.forRoot([  //! way 1
+    // * https://docs.nestjs.com/security/rate-limiting
+    // * https://www.npmjs.com/package/@nestjs/throttler/v/2.0.1
+    //   {
+    //     ttl: 15 * 60 * 1000, //* 15 minutes (unit = milliseconds)
+    //     limit: 10,
+    //   },
+    // ]),
+    // * this is for if we want to inject providers to do something like this case we inject the config to get the env variables
+    // ! if we want to do just the way normal and don't need to inject other service like in this case we can use the way above so (way 1)
+    // *  // * https://www.npmjs.com/package/@nestjs/throttler/v/2.0.1 read this to see more
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService): ThrottlerModuleOptions => {
+        return {
+          throttlers: [
+            {
+              ttl: Number(config.get('RATE_LIMIT_TTL')),
+              limit: Number(config.get('RATE_LIMIT_SLOTS')),
+            },
+          ],
+        };
+      },
+    }),
   ],
   controllers: [AppController],
   providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
     AppService,
 
     // ! we have two ways to implement global thing so we can do it in the main.ts but it will not able to use dependencies injection therefore we need to do manually like insatiate the dependency and then pass them to the constructor like new A(so here)

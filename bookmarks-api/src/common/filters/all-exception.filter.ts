@@ -7,6 +7,7 @@ import {
   // UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { ThrottlerException } from '@nestjs/throttler';
 import {
   PrismaClientKnownRequestError,
   PrismaClientValidationError,
@@ -47,6 +48,7 @@ export class AllExceptionFilter implements ExceptionFilter {
     if (status === HttpStatus.INTERNAL_SERVER_ERROR)
       defaultRes = { statusCode: 500, message: 'Something went wrong' };
 
+    // * PRISMA EXCEPTIONS ------------------------------------------
     if (exception instanceof PrismaClientKnownRequestError) {
       let statusCode: number;
       let msg: string;
@@ -74,11 +76,27 @@ export class AllExceptionFilter implements ExceptionFilter {
         message: 'Bad request',
       };
     }
+    // ---------------------------------------------------------------------------
 
     if (exception instanceof HttpException) {
       defaultRes = exception.getResponse();
+      // console.log('ok====================');
       stack = exception.stack;
     }
+
+    // * THROTTLER  EXCEPTION ------------------------------------------------------
+
+    if (exception instanceof ThrottlerException) {
+      // * because this ThrottlerException is also the type of HttpException therefore we can check this exception inside of the HttpException check, or combine condition of them
+      // * but we can make it outside like this after the HttpException check
+      defaultRes = {
+        statusCode: 429,
+        message: 'Too many requests',
+      };
+      // return response.status(status).json(defaultRes);
+    }
+
+    // ------------------------------------------------------------------------------
 
     if (this.isDev)
       defaultRes = {

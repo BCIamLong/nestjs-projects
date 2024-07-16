@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import helmet from 'helmet';
 import * as cookieParser from 'cookie-parser';
 // import { HttpExceptionFilter } from './common/filters';
 // import { AllExceptionFilter } from './common/filters/all-exception.filter';
@@ -10,6 +11,8 @@ import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.use(helmet()); // * https://docs.nestjs.com/security/helmet
 
   app.use(cookieParser());
 
@@ -30,6 +33,12 @@ async function bootstrap() {
       whitelist: true,
     }),
   );
+
+  // * https://docs.nestjs.com/security/cors
+  app.enableCors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+  });
 
   // app.useGlobalFilters(new HttpExceptionFilter());
   // app.useGlobalFilters(new AllExceptionFilter());

@@ -153,28 +153,36 @@ export class AuthController {
   @UseGuards(RefreshTokenGuard)
   @SkipGlobalInterceptor()
   @Get('refresh')
-  refresh(@GetUser('sub') id: number, @GetRefreshToken() refreshToken: string) {
-    return this.authService.refresh(id, refreshToken);
+  async refresh(
+    @GetUser('sub') id: number,
+    @GetRefreshToken() refreshToken: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const accessTokenOb = await this.authService.refresh(id, refreshToken);
+
+    res.cookie('access-token', accessTokenOb.token, {
+      expires: new Date(
+        Date.now() + Number(this.authService.access_token_expires),
+      ),
+      ...this.authService.commonCookieOptions,
+    });
+
+    return accessTokenOb;
   }
 
   setCookies(res: Response, accessToken: string, refreshToken: string) {
-    const commonOptions = {
-      httpOnly: true,
-      // secure: false,
-    };
-
     //* now we need to use this way to set cookie so basically we need to use res directly to use cookie
     res.cookie('access-token', accessToken, {
       expires: new Date(
         Date.now() + Number(this.authService.access_token_expires),
       ),
-      ...commonOptions,
+      ...this.authService.commonCookieOptions,
     });
     res.cookie('refresh-token', refreshToken, {
       expires: new Date(
         Date.now() + Number(this.authService.refresh_token_expires),
       ),
-      ...commonOptions,
+      ...this.authService.commonCookieOptions,
     });
   }
 }

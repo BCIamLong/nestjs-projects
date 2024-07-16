@@ -13,11 +13,13 @@ import { LoginDTO, SignupDTO, ValidateDTO } from './dto';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { CookieOptions } from 'express';
 
 @Injectable({})
 export class AuthService {
   access_token_expires: string;
   refresh_token_expires: string;
+  commonCookieOptions: CookieOptions;
 
   constructor(
     private prisma: PrismaService,
@@ -26,6 +28,10 @@ export class AuthService {
   ) {
     this.access_token_expires = config.get('JWT_ACCESS_TOKEN_EXPIRES');
     this.refresh_token_expires = config.get('JWT_REFRESH_TOKEN_EXPIRES');
+    this.commonCookieOptions = {
+      httpOnly: true,
+      secure: config.get('NODE_ENV') === 'production',
+    };
   }
   async login({ email, password }: LoginDTO) {
     const user = await this.prisma.user.findUnique({

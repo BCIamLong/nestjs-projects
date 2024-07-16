@@ -7,6 +7,7 @@ import { BookmarkModule } from './bookmark/bookmark.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+
 import { ResponseInterceptor } from './common/interceptors';
 import { AccessTokenGuard } from './auth/guards';
 import { SharedModule } from './shared/shared.module';
@@ -17,6 +18,7 @@ import {
   ThrottlerModule,
   ThrottlerModuleOptions,
 } from '@nestjs/throttler';
+import { MailerModule, MailerOptions } from '@nestjs-modules/mailer';
 
 @Module({
   imports: [
@@ -51,6 +53,22 @@ import {
               limit: Number(config.get('RATE_LIMIT_SLOTS')),
             },
           ],
+        };
+      },
+    }),
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService): MailerOptions => {
+        return {
+          transport: {
+            host: config.get('MAIL_HOST'),
+            port: config.get('MAIL_HOST'),
+            auth: {
+              user: config.get('MAIL_USERNAME'),
+              pass: config.get('MAIL_PASSWORD'),
+            },
+          },
         };
       },
     }),

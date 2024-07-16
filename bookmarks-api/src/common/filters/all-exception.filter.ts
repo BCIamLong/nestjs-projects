@@ -56,6 +56,13 @@ export class AllExceptionFilter implements ExceptionFilter {
         msg = 'No record found with this id';
         // throw new UnauthorizedException('Access denied');
       }
+
+      if (exception.code === 'P2002') {
+        // * duplicate unique field error
+        statusCode = 400;
+        msg = 'The data you enter is already taken';
+      }
+
       defaultRes = {
         statusCode,
         message: msg,

@@ -93,12 +93,12 @@ export class AuthService {
     const tokenPromise =
       type === 'access-token'
         ? this.jwt.signAsync(payload, {
-            secret: this.access_token_expires,
-            expiresIn: this.refresh_token_expires,
+            secret: this.config.get('JWT_ACCESS_TOKEN_SECRET'),
+            expiresIn: this.access_token_expires,
           })
         : this.jwt.signAsync(payload, {
             secret: this.config.get('JWT_REFRESH_TOKEN_SECRET'),
-            expiresIn: this.config.get('JWT_REFRESH_TOKEN_EXPIRES'),
+            expiresIn: this.refresh_token_expires,
           });
 
     const token = await tokenPromise;
@@ -129,6 +129,26 @@ export class AuthService {
 
     // return user;
     return user;
+  }
+
+  async signup1({ email, password }: SignupDTO) {
+    try {
+      const hashPwd = await hash(password);
+      const newUser = await this.prisma.user.create({
+        data: {
+          email,
+          password: hashPwd,
+        },
+      });
+
+      return this.setupTokens({ id: newUser.id, email });
+    } catch (err) {
+      if (err instanceof PrismaClientKnownRequestError)
+        if (err.code === 'P2002')
+          throw new ForbiddenException('Credentials taken');
+
+      throw err;
+    }
   }
 
   async login1({ email, password }: LoginDTO) {
@@ -231,5 +251,36 @@ export class AuthService {
     // * set access token to cookie
 
     return accessTokenObj;
+  }
+
+  async setupTokens({ id, email }: { id: number; email: string }) {
+    // * create access token and refresh token
+    const accessTokenObj = await this.signToken('access-token', {
+      sub: id,
+      email,
+    });
+
+    const refreshTokenObj = await this.signToken('refresh-token', {
+      sub: id,
+      email,
+    });
+
+    // * set these tokens to cookie
+
+    // * hash refresh token and store in the DB by update hashedRt field on the user
+    const hashedRt = await hash(refreshTokenObj.token);
+
+    await this.prisma.user.update({
+      where: {
+        id,
+      },
+      data: {
+        hashedRt,
+      },
+    });
+
+    // * return response only include the access token
+
+    return { accessTokenObj, refreshTokenObj };
   }
 }

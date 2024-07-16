@@ -116,6 +116,21 @@ export class AuthController {
     return this.authService.signup(dto);
   }
 
+  @PublicRoute()
+  @SkipGlobalInterceptor()
+  @Post('signup1')
+  async signup1(
+    @Body() dto: SignupDTO,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { accessTokenObj, refreshTokenObj } =
+      await this.authService.signup1(dto);
+
+    this.setCookies(res, accessTokenObj.token, refreshTokenObj.token);
+
+    return accessTokenObj;
+  }
+
   // * the idea of refresh token is just:
   // * 1, we have routes refresh, login, signup, logout
   // * 2, when we login or signup we will create the access, refresh tokens and set them as cookie, hash refresh token and store in the DB, only return access token
@@ -124,8 +139,14 @@ export class AuthController {
   // *4, logout will delete the refresh-token and access token cookies and also delete the hashed refresh token from our DB
 
   @Get('logout')
-  logout(@GetUser('id') id: number) {
-    return this.authService.logout(id);
+  logout(@GetUser('id') id: number, @Res({ passthrough: true }) res: Response) {
+    this.authService.logout(id);
+
+    // * remove access-token and refresh-token cookies
+    res.clearCookie('access-token');
+    res.clearCookie('refresh-token');
+
+    return null;
   }
 
   @PublicRoute()
@@ -134,5 +155,26 @@ export class AuthController {
   @Get('refresh')
   refresh(@GetUser('sub') id: number, @GetRefreshToken() refreshToken: string) {
     return this.authService.refresh(id, refreshToken);
+  }
+
+  setCookies(res: Response, accessToken: string, refreshToken: string) {
+    const commonOptions = {
+      httpOnly: true,
+      // secure: false,
+    };
+
+    //* now we need to use this way to set cookie so basically we need to use res directly to use cookie
+    res.cookie('access-token', accessToken, {
+      expires: new Date(
+        Date.now() + Number(this.authService.access_token_expires),
+      ),
+      ...commonOptions,
+    });
+    res.cookie('refresh-token', refreshToken, {
+      expires: new Date(
+        Date.now() + Number(this.authService.refresh_token_expires),
+      ),
+      ...commonOptions,
+    });
   }
 }

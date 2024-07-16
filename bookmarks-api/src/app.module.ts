@@ -38,7 +38,7 @@ import { LoggerMiddleware } from './common/middlewares';
     { provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },
     // * for global interceptor use in main.ts we use use it for like logger or maybe if we have more service and not only our app and we have interceptors for that then we can apply global as i did before right
     { provide: APP_GUARD, useClass: AccessTokenGuard },
-    // { provide: APP_FILTER, useClass: AllExceptionFilter },
+    { provide: APP_FILTER, useClass: AllExceptionFilter },
   ],
 })
 export class AppModule implements NestModule {

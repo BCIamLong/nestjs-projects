@@ -17,6 +17,9 @@ import { CookieOptions } from 'express';
 
 @Injectable({})
 export class AuthService {
+  // * Instead of inject the config service to the auth controller and get env variables to set up something we can do it right here in our service because we already inject the config service in here
+  // * and we can leverage this and setup everything here which needs the env variable by using config service and later in controller we can inject this and also use these variables right
+  // * instead of inject the config service to the controller and do something right
   access_token_expires: string;
   refresh_token_expires: string;
   commonCookieOptions: CookieOptions;

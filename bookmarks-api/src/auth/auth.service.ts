@@ -16,11 +16,17 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable({})
 export class AuthService {
+  access_token_expires: string;
+  refresh_token_expires: string;
+
   constructor(
     private prisma: PrismaService,
     private jwt: JwtService,
     private config: ConfigService,
-  ) {}
+  ) {
+    this.access_token_expires = config.get('JWT_ACCESS_TOKEN_EXPIRES');
+    this.refresh_token_expires = config.get('JWT_REFRESH_TOKEN_EXPIRES');
+  }
   async login({ email, password }: LoginDTO) {
     const user = await this.prisma.user.findUnique({
       where: {
@@ -87,8 +93,8 @@ export class AuthService {
     const tokenPromise =
       type === 'access-token'
         ? this.jwt.signAsync(payload, {
-            secret: this.config.get('JWT_ACCESS_TOKEN_SECRET'),
-            expiresIn: this.config.get('JWT_ACCESS_TOKEN_EXPIRES'),
+            secret: this.access_token_expires,
+            expiresIn: this.refresh_token_expires,
           })
         : this.jwt.signAsync(payload, {
             secret: this.config.get('JWT_REFRESH_TOKEN_SECRET'),

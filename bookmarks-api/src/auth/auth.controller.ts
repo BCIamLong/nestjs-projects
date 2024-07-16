@@ -5,16 +5,23 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Res,
   UseGuards,
   // UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 // import { Request } from 'express';
 import { LoginDTO, SignupDTO } from './dto';
-import { PublicRoute, SkipGlobalInterceptor } from 'src/common/decorators';
+import {
+  PublicRoute,
+  // SetCookie,
+  SkipGlobalInterceptor,
+} from 'src/common/decorators';
 import { GetRefreshToken, GetUser } from './decorators';
 import { RefreshTokenGuard } from './guards';
 import { ApiTags } from '@nestjs/swagger';
+// import { SetCookieFnc } from 'src/common/types';
+import { Response } from 'express';
 // import { LocalGuard } from './guards';
 // import { GetUser } from './decorators';
 // import { User } from '@prisma/client';
@@ -68,9 +75,38 @@ export class AuthController {
   @SkipGlobalInterceptor()
   @PublicRoute()
   @Post('local/login1')
-  login1(@Body() dto: LoginDTO) {
+  async login1(
+    @Body() dto: LoginDTO,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     // * this for test access token and refresh token way
-    return this.authService.login1(dto);
+    const { accessTokenObj, refreshTokenObj } =
+      await this.authService.login1(dto);
+
+    const commonOptions = {
+      httpOnly: true,
+      // secure: false,
+    };
+
+    //* now we need to use this way to set cookie so basically we need to use res directly to use cookie
+    res.cookie('access-token', accessTokenObj.token, {
+      expires: new Date(
+        Date.now() + Number(this.authService.access_token_expires),
+      ),
+      ...commonOptions,
+    });
+    res.cookie('refresh-token', refreshTokenObj.token, {
+      expires: new Date(
+        Date.now() + Number(this.authService.refresh_token_expires),
+      ),
+      ...commonOptions,
+    });
+
+    // !  @Res({ passthrough: true }) when we use res directly nestjs will allow us to modify the response so basically it will not automatically send response for us like this (2)
+    // * but we need to use (2) to send response but if we don't want we can use @Res({ passthrough: true }) with option passthrough allow the default behavior so send response automatically
+    // res.json(accessTokenObj); //*(1)
+    // return accessTokenObj; //*(2)
+    return accessTokenObj; //* so now we can use this way when we do @Res({ passthrough: true })
   }
 
   @PublicRoute()

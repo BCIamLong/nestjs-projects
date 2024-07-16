@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as cookieParser from 'cookie-parser';
 // import { HttpExceptionFilter } from './common/filters';
 // import { AllExceptionFilter } from './common/filters/all-exception.filter';
 // import { AccessTokenGuard } from './auth/guards';
@@ -9,6 +10,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.use(cookieParser());
 
   // * in this case we just want to use the interceptor for response in our app module so for all modules in our app then we can put it in app module not necessary to put it here
   // * this global interceptor usually for logger and maybe effect to other service or something outside of our app module

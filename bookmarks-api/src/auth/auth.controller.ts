@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -113,6 +114,7 @@ export class AuthController {
   @SkipGlobalInterceptor()
   @Post('signup')
   signup(@Body() dto: SignupDTO) {
+    if (dto.passwordConfirm !== dto.password) throw new BadRequestException();
     return this.authService.signup(dto);
   }
 
@@ -123,6 +125,8 @@ export class AuthController {
     @Body() dto: SignupDTO,
     @Res({ passthrough: true }) res: Response,
   ) {
+    if (dto.passwordConfirm !== dto.password) throw new BadRequestException();
+
     const { accessTokenObj, refreshTokenObj } =
       await this.authService.signup1(dto);
 

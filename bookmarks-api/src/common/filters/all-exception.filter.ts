@@ -7,7 +7,10 @@ import {
   // UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import {
+  PrismaClientKnownRequestError,
+  PrismaClientValidationError,
+} from '@prisma/client/runtime/library';
 
 // * we can use filter to custom the default errors handler of nest js
 
@@ -56,6 +59,12 @@ export class AllExceptionFilter implements ExceptionFilter {
       defaultRes = {
         statusCode,
         message: msg,
+      };
+    }
+    if (exception instanceof PrismaClientValidationError) {
+      defaultRes = {
+        statusCode: 400,
+        message: 'Bad request',
       };
     }
 

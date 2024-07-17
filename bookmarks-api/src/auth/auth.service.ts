@@ -151,6 +151,14 @@ export class AuthService {
           password: hashPwd,
         },
       });
+      // * now when we signup we want to send the welcome email or the verify email to the user right
+      // * but the email process will take some time to do right and if we do it in the same place like this it can be make the process signup lower and the user doesn't want that so they want it fast right
+      // * and therefore it can be problem and make the bad UX
+      // * to solve this problem we can use something call event emitter so basically it will implement the event emit pattern and it's kind of like the event emit in nodejs what we did before
+      // * https://docs.nestjs.com/techniques/events
+      // * so when we sign up we emit the event to send mail but we don't block the process then the user get the response while the event happen and the send mail happens
+      // * so it's run on other thread therefore it doesn't affect to this signup current thread right
+      // * of course we can decouple our code to easy to manage by using this event emit pattern when our code grow too big right
 
       return this.setupTokens({ id: newUser.id, email });
     } catch (err) {
@@ -172,6 +180,7 @@ export class AuthService {
 
       if (!user) throw new NotFoundException('User is not exist');
 
+      //****************************************** */
       this.mailService.sendEmail(
         {
           to: email,

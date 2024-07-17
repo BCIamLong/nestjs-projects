@@ -18,7 +18,7 @@ import {
   ThrottlerModule,
   ThrottlerModuleOptions,
 } from '@nestjs/throttler';
-import { MailerModule, MailerOptions } from '@nestjs-modules/mailer';
+// import { MailerModule, MailerOptions } from '@nestjs-modules/mailer';
 
 @Module({
   imports: [
@@ -53,22 +53,6 @@ import { MailerModule, MailerOptions } from '@nestjs-modules/mailer';
               limit: Number(config.get('RATE_LIMIT_SLOTS')),
             },
           ],
-        };
-      },
-    }),
-    MailerModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (config: ConfigService): MailerOptions => {
-        return {
-          transport: {
-            host: config.get('MAIL_HOST'),
-            port: config.get('MAIL_HOST'),
-            auth: {
-              user: config.get('MAIL_USERNAME'),
-              pass: config.get('MAIL_PASSWORD'),
-            },
-          },
         };
       },
     }),

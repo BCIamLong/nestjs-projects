@@ -15,6 +15,8 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { CookieOptions } from 'express';
 import { AppMailerService } from 'src/shared/mailer/mailer.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { UserCreatedEvent } from 'src/common/events';
 
 @Injectable({})
 export class AuthService {
@@ -30,6 +32,7 @@ export class AuthService {
     private jwt: JwtService,
     private config: ConfigService,
     private mailService: AppMailerService,
+    private readonly eventEmitter: EventEmitter2,
   ) {
     this.access_token_expires = config.get('JWT_ACCESS_TOKEN_EXPIRES');
     this.refresh_token_expires = config.get('JWT_REFRESH_TOKEN_EXPIRES');
@@ -181,14 +184,25 @@ export class AuthService {
       if (!user) throw new NotFoundException('User is not exist');
 
       //****************************************** */
-      this.mailService.sendEmail(
-        {
-          to: email,
-          text: 'Hello',
-          subject: 'Hello',
-        },
-        user,
+      // this.mailService.sendEmail(
+      //   {
+      //     to: email,
+      //     text: 'Hello',
+      //     subject: 'Hello',
+      //   },
+      //   user,
+      // );
+      // * to really ensure the type of the payload is pass true we can create the class and use it to create the payload and then use it as type as the receiver to check that payload type
+      // * in this case we make sure we will use UserCreatedEvent payload type so make sure people pass something really true
+      // * https://www.youtube.com/watch?v=btLyiMUs_Cw&t=565s can watch at the events part
+      this.eventEmitter.emit(
+        'user.created',
+        new UserCreatedEvent('Welcome to the bookmarks app', user),
       );
+      // this.eventEmitter.emit('user.created', {
+      //   subject: 'Welcome to the bookmarks app',
+      //   user,
+      // });
 
       const verifyLogin = await verify(user.password, password);
 

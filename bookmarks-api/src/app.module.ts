@@ -18,6 +18,7 @@ import {
   ThrottlerModule,
   ThrottlerModuleOptions,
 } from '@nestjs/throttler';
+// import { EventEmitterModule } from '@nestjs/event-emitter';
 // import { MailerModule, MailerOptions } from '@nestjs-modules/mailer';
 
 @Module({
@@ -25,6 +26,7 @@ import {
     AuthModule,
     UserModule,
     BookmarkModule,
+    // EventEmitterModule.forRoot(),
     PrismaModule,
     // * this config module here is just like we use dotenv and get the env variables from .env file
     ConfigModule.forRoot({

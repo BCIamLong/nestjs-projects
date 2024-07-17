@@ -16,7 +16,7 @@ export class AppMailerService {
     private readonly config: ConfigService,
   ) {}
 
-  async sendEmail({ subject }: MailOptions, user: User) {
+  async sendEmail(subject: string, user: User) {
     try {
       const text = await this.getText(user);
       // console.log({ to, subject, text, html });

@@ -23,7 +23,7 @@ import { GoogleGuard, RefreshTokenGuard } from './guards';
 import { ApiTags } from '@nestjs/swagger';
 // import { SetCookieFnc } from 'src/common/types';
 import { Response } from 'express';
-import { User } from '@prisma/client';
+// import { User } from '@prisma/client';
 // import { LocalGuard } from './guards';
 // import { GetUser } from './decorators';
 // import { User } from '@prisma/client';
@@ -194,7 +194,13 @@ export class AuthController {
   @PublicRoute()
   @UseGuards(GoogleGuard)
   @Get('google/login')
-  googleLogin(@GetUser() user: User) {
+  googleLogin(@GetUser() user: any, @Res({ passthrough: true }) res: Response) {
+    const { accessTokenObj, refreshTokenObj } = user;
+    this.setCookies(res, accessTokenObj.token, refreshTokenObj.token);
+
+    delete user.accessTokenObj;
+    delete user.refreshTokenObj;
+
     return user;
   }
 }

@@ -19,7 +19,7 @@ import {
   SkipGlobalInterceptor,
 } from 'src/common/decorators';
 import { GetRefreshToken, GetUser } from './decorators';
-import { GoogleGuard, RefreshTokenGuard } from './guards';
+import { FacebookGuard, GoogleGuard, RefreshTokenGuard } from './guards';
 import { ApiTags } from '@nestjs/swagger';
 // import { SetCookieFnc } from 'src/common/types';
 import { Response } from 'express';
@@ -203,4 +203,21 @@ export class AuthController {
 
     return user;
   }
+
+  // ! now we will not use facebook login yet but just setup like this so the thing we need to do after is just setup facebook developer and get the configuration info client id, secret and also setup the login screen...
+  // @PublicRoute()
+  // @UseGuards(FacebookGuard)
+  // @Get('google/login')
+  // facebookLogin(
+  //   @GetUser() user: any,
+  //   @Res({ passthrough: true }) res: Response,
+  // ) {
+  //   const { accessTokenObj, refreshTokenObj } = user;
+  //   this.setCookies(res, accessTokenObj.token, refreshTokenObj.token);
+
+  //   delete user.accessTokenObj;
+  //   delete user.refreshTokenObj;
+
+  //   return user;
+  // }
 }

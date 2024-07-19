@@ -9,6 +9,7 @@ import {
   LocalStrategy,
   RefreshTokenJWTStrategy,
 } from './strategies';
+import { FacebookStrategy } from './strategies/facebook.strategy';
 // import { PrismaModule } from 'src/prisma/prisma.module';
 
 @Module({
@@ -30,6 +31,8 @@ import {
     // * because we want to use google strategy and more specific in side the auth module therefore we need to provide it as provider in this case
     // * if it's outside module we need to import it
     GoogleStrategy,
+    // ! now we will not use facebook login yet but just setup like this so the thing we need to do after is just setup facebook developer and get the configuration info client id, secret and also setup the login screen...
+    // FacebookStrategy,
     AccessTokenJWTStrategy,
     RefreshTokenJWTStrategy,
   ],

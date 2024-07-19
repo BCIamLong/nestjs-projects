@@ -4,6 +4,7 @@ import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import {
   AccessTokenJWTStrategy,
+  GoogleStrategy,
   JWTStrategy,
   LocalStrategy,
   RefreshTokenJWTStrategy,
@@ -24,6 +25,11 @@ import {
     AuthService,
     JWTStrategy,
     LocalStrategy,
+    // ! remember that always provide provider when we want to use something, so in this case we want to use google strategy right so we can't just declare it and it will be use
+    // * because when we use AuthGuard('google') we misunderstand that it will happen automatically but it's just abstract and underneath the hood it still need something to configure for work right
+    // * because we want to use google strategy and more specific in side the auth module therefore we need to provide it as provider in this case
+    // * if it's outside module we need to import it
+    GoogleStrategy,
     AccessTokenJWTStrategy,
     RefreshTokenJWTStrategy,
   ],

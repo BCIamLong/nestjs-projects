@@ -163,6 +163,11 @@ export class AuthService {
       // * so it's run on other thread therefore it doesn't affect to this signup current thread right
       // * of course we can decouple our code to easy to manage by using this event emit pattern when our code grow too big right
 
+      this.eventEmitter.emit(
+        'user.created',
+        new UserCreatedEvent('Welcome to the bookmarks app', newUser),
+      );
+
       return this.setupTokens({ id: newUser.id, email });
     } catch (err) {
       if (err instanceof PrismaClientKnownRequestError)
@@ -195,10 +200,10 @@ export class AuthService {
       // * to really ensure the type of the payload is pass true we can create the class and use it to create the payload and then use it as type as the receiver to check that payload type
       // * in this case we make sure we will use UserCreatedEvent payload type so make sure people pass something really true
       // * https://www.youtube.com/watch?v=btLyiMUs_Cw&t=565s can watch at the events part
-      this.eventEmitter.emit(
-        'user.created',
-        new UserCreatedEvent('Welcome to the bookmarks app', user),
-      );
+      // this.eventEmitter.emit(
+      //   'user.created',
+      //   new UserCreatedEvent('Welcome to the bookmarks app', user),
+      // );
       // this.eventEmitter.emit('user.created', {
       //   subject: 'Welcome to the bookmarks app',
       //   user,

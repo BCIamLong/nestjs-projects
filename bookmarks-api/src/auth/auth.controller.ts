@@ -19,10 +19,11 @@ import {
   SkipGlobalInterceptor,
 } from 'src/common/decorators';
 import { GetRefreshToken, GetUser } from './decorators';
-import { RefreshTokenGuard } from './guards';
+import { GoogleGuard, RefreshTokenGuard } from './guards';
 import { ApiTags } from '@nestjs/swagger';
 // import { SetCookieFnc } from 'src/common/types';
 import { Response } from 'express';
+import { User } from '@prisma/client';
 // import { LocalGuard } from './guards';
 // import { GetUser } from './decorators';
 // import { User } from '@prisma/client';
@@ -188,5 +189,12 @@ export class AuthController {
       ),
       ...this.authService.commonCookieOptions,
     });
+  }
+
+  @PublicRoute()
+  @UseGuards(GoogleGuard)
+  @Get('google/login')
+  googleLogin(@GetUser() user: User) {
+    return user;
   }
 }

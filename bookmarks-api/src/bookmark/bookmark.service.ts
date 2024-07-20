@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateBookmark, UpdateBookmark } from './dto';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
@@ -65,6 +69,9 @@ export class BookmarkService {
         data: dto,
       });
 
+      if (!updatedBookmark)
+        throw new BadRequestException('Bookmark input is invalid');
+
       return { bookmark: updatedBookmark };
       // return {
       //   status: 'success',
@@ -82,7 +89,9 @@ export class BookmarkService {
         //       status: 'fail',
         //       message: 'No bookmarks found with this id',
         //     };
+        // if (err.code === 'P2003') throw new BadRequestException();
       }
+      throw err;
     }
   }
 

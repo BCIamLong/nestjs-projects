@@ -65,6 +65,12 @@ export class AllExceptionFilter implements ExceptionFilter {
         msg = 'The data you enter is already taken';
       }
 
+      if (exception.code === 'P2003') {
+        // status = 400;
+        statusCode = 400;
+        msg = 'The input data is invalid';
+      }
+
       defaultRes = {
         statusCode,
         message: msg,

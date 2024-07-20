@@ -12,6 +12,7 @@ export class AppController {
 
   @ApiOperation({ summary: 'Health check' })
   @ApiResponse({ status: 200, description: 'Ok' })
+  @PublicRoute()
   @Get('/health-check')
   healthCheck(): string {
     return this.appService.healthCheck();

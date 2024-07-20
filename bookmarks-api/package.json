@@ -20,7 +20,13 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/e2e/jest-e2e.json",
+    "pretest:int1": "dotenv -v NODE_ENV=test -- prisma migrate reset --force",
+    "test:int1": "dotenv -v NODE_ENV=test -- jest -i --no-cache --config ./test/integration/jest-int.json",
+    "env:test": "npx dotenv -e .env.test",
+    "test:int": "npx dotenv -e .env.test -- npx jest -i --no-cache --config ./test/integration/jest-int.json",
+    "test:int:watch": "npx dotenv -e .env.test -- npx jest -i --no-cache --watch --config ./test/integration/jest-int.json",
+    "pre:test:int": "npx dotenv -e .env.test -- npx prisma migrate reset --force"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^2.0.2",
@@ -67,6 +73,7 @@
     "@types/supertest": "^6.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
+    "dotenv-cli": "^7.4.2",
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",

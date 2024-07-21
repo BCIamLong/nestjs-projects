@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
@@ -10,6 +10,7 @@ import * as cookieParser from 'cookie-parser';
 // import { ResponseInterceptor } from './common/interceptors';
 
 async function bootstrap() {
+  const logger = new Logger();
   const app = await NestFactory.create(AppModule);
 
   app.use(helmet()); // * https://docs.nestjs.com/security/helmet
@@ -58,6 +59,10 @@ async function bootstrap() {
     jsonDocumentUrl: 'api-doc/json',
   });
 
-  await app.listen(5000);
+  const port = process.env.PORT || 5000;
+
+  await app.listen(port);
+  logger.log(`Server is listening at port ${port}`);
+  logger.log(`Server is available at http://localhost:${port}`);
 }
 bootstrap();

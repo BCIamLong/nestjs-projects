@@ -83,6 +83,7 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     // * https://github.com/stuyy/nestjs-crash-course/blob/master/src/users/users.module.ts see more about how we can implement middleware
     // * https://docs.nestjs.com/middleware
-    consumer.apply(LoggerMiddleware).forRoutes('users', 'bookmarks', 'auth');
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+    // consumer.apply(LoggerMiddleware).forRoutes('users', 'bookmarks', 'auth');
   }
 }

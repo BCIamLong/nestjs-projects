@@ -1,0 +1,2 @@
+in jest when we change something in the major file so not file test and we're running test we need to run test again if we use watch mode
+so watch mode in jest is only track and host reload for test file not for the major file (just not file test like file controllers, services....)

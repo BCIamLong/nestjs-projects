@@ -8,6 +8,8 @@ import {
   PrismaClientKnownRequestError,
   PrismaClientValidationError,
 } from '@prisma/client/runtime/library';
+import { bookmarkInput, userInput } from 'test/__mocks__';
+import { LoggerService } from 'src/shared/logger/logger.service';
 
 // * WE JUST TEST LOGIC IN THE SERVICE WITH OUR DB AND EXTERNAL SERVICES OR DEPENDENCIES AND WITHOUT MOCK ANYTHING RIGHT
 // * WE DON'T TOUCH TO CONTROLLER BECAUSE FOR THAT WE NEED SEND REQUEST AND WE CAN USE SOMETHING LIKE SUPER TEST BUT IT'S E2E TESTING (BACKEND) RIGHT
@@ -19,18 +21,18 @@ describe('Bookmark (integration)', () => {
   let userId: number;
   let bookmarkId: number;
 
-  const bookmarkInput = {
-    title: 'Test Bookmark',
-    description: 'Description',
-    link: 'link',
-  };
+  // const bookmarkInput = {
+  //   title: 'Test Bookmark',
+  //   description: 'Description',
+  //   link: 'link',
+  // };
 
-  const userInput = {
-    email: 'test@gmail.com',
-    name: 'Test User',
-    role: 'user',
-    password: 'test123',
-  };
+  // const userInput = {
+  //   email: 'test@gmail.com',
+  //   name: 'Test User',
+  //   role: 'user',
+  //   password: 'test123',
+  // };
 
   // const bookmark = {
   //   id: 123,
@@ -50,6 +52,7 @@ describe('Bookmark (integration)', () => {
         PrismaService,
         ConfigService,
         BookmarkServiceTest,
+        LoggerService,
       ],
     }).compile();
 

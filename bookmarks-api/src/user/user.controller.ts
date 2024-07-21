@@ -20,7 +20,8 @@ import {
 // @Roles(Role.ADMIN, Role.MANAGER) //* use for the RBAC way when we don't use access control
 @UseGuards(RolesGuard)
 @UseGuards(JWTGuard)
-@Roles(Role.ADMIN)
+// @Roles(Role.ADMIN)
+@Roles(Role.USER)
 @Controller('users')
 export class UserController {
   constructor(private userService: UserService) {}

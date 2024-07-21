@@ -1,4 +1,10 @@
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  Matches,
+  MinLength,
+} from 'class-validator';
 
 export class LoginDTO {
   @IsNotEmpty()
@@ -6,6 +12,8 @@ export class LoginDTO {
   email: string;
 
   @IsNotEmpty()
+  @Matches(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/)
+  @MinLength(8)
   @IsString()
   password: string;
 }

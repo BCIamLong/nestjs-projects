@@ -76,6 +76,7 @@ export class AuthController {
 
   @SkipGlobalInterceptor()
   @PublicRoute()
+  @HttpCode(HttpStatus.OK)
   @Post('local/login1')
   async login1(
     @Body() dto: LoginDTO,

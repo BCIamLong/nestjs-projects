@@ -4,6 +4,7 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import * as cookieParser from 'cookie-parser';
+import { LoggerService } from './shared/logger/logger.service';
 // import { HttpExceptionFilter } from './common/filters';
 // import { AllExceptionFilter } from './common/filters/all-exception.filter';
 // import { AccessTokenGuard } from './auth/guards';
@@ -11,7 +12,11 @@ import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const logger = new Logger();
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: true,
+  });
+
+  app.useLogger(app.get(LoggerService));
 
   app.use(helmet()); // * https://docs.nestjs.com/security/helmet
 

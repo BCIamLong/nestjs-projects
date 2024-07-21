@@ -14,6 +14,7 @@ import { PublicRoute } from 'src/common/decorators';
 import { BookmarkServiceTest } from './bookmark-test.service';
 import { ParseIntPipeCustom } from 'src/common/pipes';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { LoggerService } from 'src/shared/logger/logger.service';
 
 @ApiTags('bookmarks')
 @Controller('bookmarks')
@@ -21,6 +22,7 @@ export class BookmarkController {
   constructor(
     private bookmarkService: BookmarkService,
     private bookmarkTestService: BookmarkServiceTest,
+    private logger: LoggerService,
   ) {}
 
   @ApiOperation({ summary: 'get a list of bookmarks' })
@@ -30,6 +32,9 @@ export class BookmarkController {
   @Get('')
   getBookmarks() {
     // return this.bookmarkTestService.findAll();
+    this.logger.log(
+      'CREATE CUSTOM LOGGER AND USE IT AS DEPENDENCIES INJECTION',
+    );
     return this.bookmarkService.getBookmarks();
   }
 

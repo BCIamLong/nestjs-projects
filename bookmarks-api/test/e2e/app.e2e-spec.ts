@@ -4,9 +4,9 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from 'src/app.module';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { loginDto, signupDto } from 'test/__mocks__';
+import { bookmarkInput, loginDto, signupDto } from 'test/__mocks__';
 
-// * USER => SIGNUP => LOGIN => SEE PROFILE => EDIT PROFILE => SEE BOOKMARKS => SEE SPECIFIC BOOKMARK => CREATE BOOKMARK => UPDATE USER'S BOOKMARK => DELETE USER'S BOOKMARK => LOGOUT
+// * USER => SIGNUP => LOGIN => GET PROFILE => EDIT PROFILE => GO TO DASHBOARD OR SOMETHING => SEE EMPTY LIST OF BOOKMARKS =>  CREATE BOOKMARK => GET BOOKMARKS =>  GET SPECIFIC BOOKMARK => UPDATE USER'S BOOKMARK => DELETE USER'S BOOKMARK => LOGOUT
 
 // * https://pactumjs.github.io/api/requests
 
@@ -185,13 +185,15 @@ describe('App (e2e)', () => {
 
   describe('User', () => {
     describe('Get me', () => {
-      it("should throw an error if the user doesn't login", async () => {
-        await pactum
-          .spec()
-          .get('/users/me')
-          .expectStatus(401)
-          .expectBodyContains('message');
-      });
+      // it("should throw an error if the user doesn't login", async () => {
+      // ! because we follow the flow of the user use our app process right, we don't test it like separate like unit test
+      // * it should go as the flow now the user already login we don't do something like this like in unit test right we now do the e2e testing so it's different
+      //   await pactum
+      //     .spec()
+      //     .get('/users/me')
+      //     .expectStatus(401)
+      //     .expectBodyContains('message');
+      // });
 
       it('should get the current user data', async () => {
         await pactum
@@ -212,13 +214,15 @@ describe('App (e2e)', () => {
     });
 
     describe('Update me', () => {
-      it("should throw an error if the user doesn't login", async () => {
-        await pactum
-          .spec()
-          .patch('/users/me')
-          .expectStatus(401)
-          .expectBodyContains('message');
-      });
+      // it("should throw an error if the user doesn't login", async () => {
+      // ! because we follow the flow of the user use our app process right, we don't test it like separate like unit test
+      // * it should go as the flow now the user already login we don't do something like this like in unit test right we now do the e2e testing so it's different
+      //   await pactum
+      //     .spec()
+      //     .patch('/users/me')
+      //     .expectStatus(401)
+      //     .expectBodyContains('message');
+      // });
 
       it('should throw an error if the input fields are invalid', async () => {
         await pactum
@@ -258,5 +262,230 @@ describe('App (e2e)', () => {
     });
   });
 
-  describe('Bookmark', () => {});
+  describe('Bookmark', () => {
+    describe('Get bookmarks', () => {
+      it('should get an empty list of bookmarks', async () => {
+        await pactum
+          .spec()
+          .get('/bookmarks')
+          .withBearerToken('$S{accessToken}')
+          .expectStatus(200)
+          .expectBodyContains('data')
+          .expectBodyContains([]); //* we even check the value contains in the body not only the key like above
+      });
+    });
+
+    describe('Create bookmark', () => {
+      it('should throw an error if the input fields are empty', async () => {
+        await pactum
+          .spec()
+          .post('/bookmarks')
+          .withBearerToken('$S{accessToken}')
+          .expectStatus(400)
+          .expectBodyContains('message');
+      });
+
+      it('should throw an error if the required input fields are empty', async () => {
+        await pactum
+          .spec()
+          .post('/bookmarks')
+          .withBearerToken('$S{accessToken}')
+          .withBody({ ...bookmarkInput, title: '', link: '' })
+          .expectStatus(400)
+          .expectBodyContains('message');
+      });
+
+      it('should throw an error if the input fields are invalid', async () => {
+        await pactum
+          .spec()
+          .post('/bookmarks')
+          .withBearerToken('$S{accessToken}')
+          .withBody({ ...bookmarkInput, title: 1234, link: 1234 })
+          .expectStatus(400)
+          .expectBodyContains('message');
+      });
+
+      it('should create a bookmark', async () => {
+        await pactum
+          .spec()
+          .post('/bookmarks')
+          .withBearerToken('$S{accessToken}')
+          // * the access token strategy will check the token and assign the user payload to the req.user
+          // * then we get the userId from there so we don't need to pass userId to the bookmark input
+          // * like {...bookmarkInput, userId} so we don't need to do that right
+          .withBody(bookmarkInput)
+          .expectStatus(201)
+          .expectBodyContains('data');
+        // .inspect();
+      });
+    });
+
+    describe('Get bookmarks', () => {
+      it('should get a list of bookmarks', async () => {
+        await pactum
+          .spec()
+          .get('/bookmarks')
+          .withBearerToken('$S{accessToken}')
+          .expectStatus(200)
+          .expectBodyContains('data')
+          .expectBodyContains(bookmarkInput.title)
+          // ?WE HAVE TWO WAYS TO STORE DATA
+          // * 1: store data with key and the path to get that value of data from response or request body or something like that
+          // * path: can be chaining by we use the array way or object way also true
+          // * body: {status: '', data: { bookmarks: [ { id, title,... } ] }}
+          // * => [data].bookmarks[0].id, the first level is req.body, so we can use [data] to get that from req.body first level and then chaining to get the value we want
+          .stores('bookmarkId', '[data].bookmarks[0].id');
+
+        // * 2: store as use the callback and instead write the path to scan and get value we can take the response and get the value from it
+        // * https://pactumjs.github.io/api/requests/stores.html#using-custom-function
+        // .stores((req, res) => {
+        // console.log(res.body.data);
+        //   return {
+        //     bookmarkId: res.body.data.bookmarks[0].id,
+        //   };
+        // });
+      });
+    });
+
+    describe('Get specific bookmark', () => {
+      it('should throw an error if the id is invalid', async () => {
+        await pactum
+          .spec()
+          .get('/bookmarks/{id}')
+          .withPathParams('id', 'invalid_id')
+          .withBearerToken('$S{accessToken}')
+          .expectStatus(400)
+          .expectBodyContains('message');
+      });
+
+      it('should throw an error if the id of bookmark not exist', async () => {
+        await pactum
+          .spec()
+          .get('/bookmarks/{id}')
+          .withPathParams('id', 12345678)
+          .withBearerToken('$S{accessToken}')
+          .expectStatus(404)
+          .expectBodyContains('message');
+      });
+
+      it('should get a bookmark', async () => {
+        await pactum
+          .spec()
+          .get('/bookmarks/{id}')
+          .withPathParams('id', '$S{bookmarkId}')
+          .withBearerToken('$S{accessToken}')
+          .expectStatus(200)
+          .expectBodyContains('data');
+      });
+    });
+
+    describe('Update a bookmark', () => {
+      it('should throw an error if the id is invalid', async () => {
+        await pactum
+          .spec()
+          .patch('/bookmarks/{id}')
+          .withPathParams('id', 'invalid_id')
+          .withBearerToken('$S{accessToken}')
+          .expectStatus(400)
+          .expectBodyContains('message');
+      });
+
+      it('should throw an error if the id of bookmark not exist', async () => {
+        await pactum
+          .spec()
+          .patch('/bookmarks/{id}')
+          .withPathParams('id', 12345678)
+          .withBearerToken('$S{accessToken}')
+          .expectStatus(404)
+          .expectBodyContains('message');
+      });
+
+      // it('should throw an error if the required input fields are empty', async () => {
+      //   await pactum
+      // ! usually that when we update we don't write anything like this it will catch error by front-end but in backend we usually write optional for all fields when update
+      // ! because the meaning that we can update it or not, but it should include when define that and want to update the field if the field is required it should be not empty ( this can be handle in front-end )
+      // * THIS IS CONSIDERATION: SO WHEN WE STORE DATA LIKE THIS { title: '', link: '', description: '' } IT WILL WORK IN BACKEND IF IT'S NOT HANDLE FROM FRONT-END AND WE DON'T WANT THAT RIGHT
+      // * SO THIS IS CONSIDERATION
+      //     .spec()
+      //     .patch('/bookmarks/{id}')
+      //     .withPathParams('id', '$S{bookmarkId}')
+      //     .withBearerToken('$S{accessToken}')
+      //     .withBody({ title: '', link: '', description: '' })
+      //     .expectStatus(400)
+      //     .expectBodyContains('message');
+      // });
+
+      it('should throw an error if the input fields are invalid', async () => {
+        await pactum
+          .spec()
+          .patch('/bookmarks/{id}')
+          .withPathParams('id', '$S{bookmarkId}')
+          .withBearerToken('$S{accessToken}')
+          .withBody({ ...bookmarkInput, title: 1234, link: 1234 })
+          .expectStatus(400)
+          .expectBodyContains('message');
+      });
+
+      it('should update bookmark', async () => {
+        await pactum
+          .spec()
+          .patch('/bookmarks/{id}')
+          .withPathParams('id', '$S{bookmarkId}')
+          .withBearerToken('$S{accessToken}')
+          .withBody({
+            ...bookmarkInput,
+            title: 'New Title',
+            link: 'new_link',
+          })
+          .expectStatus(200)
+          .expectBodyContains('data');
+        // .inspect();
+      });
+    });
+
+    describe('Delete a bookmark', () => {
+      it('should throw an error if the id is invalid', async () => {
+        await pactum
+          .spec()
+          .delete('/bookmarks/{id}')
+          .withPathParams('id', 'invalid_id')
+          .withBearerToken('$S{accessToken}')
+          .expectStatus(400)
+          .expectBodyContains('message');
+      });
+
+      it('should throw an error if the id of bookmark not exist', async () => {
+        await pactum
+          .spec()
+          .delete('/bookmarks/{id}')
+          .withPathParams('id', 12345678)
+          .withBearerToken('$S{accessToken}')
+          .expectStatus(404)
+          .expectBodyContains('message');
+      });
+
+      it('should delete a bookmark', async () => {
+        await pactum
+          .spec()
+          .delete('/bookmarks/{id}')
+          .withPathParams('id', '$S{bookmarkId}')
+          .withBearerToken('$S{accessToken}')
+          .expectStatus(204)
+          .expectBody(null);
+      });
+    });
+  });
+
+  describe('Auth', () => {
+    describe('Logout', () => {
+      it('should logout user', async () => {
+        await pactum
+          .spec()
+          .get('/auth/logout')
+          .withBearerToken('$S{accessToken}')
+          .expectStatus(200)
+          .inspect();
+      });
+    });
+  });
 });

@@ -5,6 +5,7 @@ import { BookmarkTestController } from './bookmark-test.controller';
 import { BookmarkServiceTest } from './bookmark-test.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
+import { LoggerService } from 'src/shared/logger/logger.service';
 // import { RolesGuard } from 'src/common/guards';
 
 describe('BookmarkController', () => {
@@ -12,19 +13,18 @@ describe('BookmarkController', () => {
   let bookmarkController: BookmarkController;
   let bookmarkService: BookmarkService;
   const bookmarkId = 12345;
+  const userId = 1;
 
   const invalidBookmarkInput = {
     title: '',
     description: 'Description',
     link: '',
-    userId: 0,
   };
 
   const bookmarkInput = {
     title: 'Test Bookmark',
     description: 'Description',
     link: 'link',
-    userId: 1,
   };
 
   const bookmark = {
@@ -58,6 +58,7 @@ describe('BookmarkController', () => {
         BookmarkServiceTest,
         PrismaService,
         ConfigService,
+        LoggerService,
       ],
     }).compile();
 
@@ -127,9 +128,10 @@ describe('BookmarkController', () => {
           statusCode: 400,
         });
         try {
-          await bookmarkController.createBookmark(invalidBookmarkInput);
+          await bookmarkController.createBookmark(userId, invalidBookmarkInput);
         } catch (err) {
           expect(bookmarkService.createBookmark).toHaveBeenCalledWith(
+            userId,
             invalidBookmarkInput,
           );
           expect(err.statusCode).toBe(400);
@@ -143,9 +145,13 @@ describe('BookmarkController', () => {
           .spyOn(bookmarkService, 'createBookmark')
           .mockResolvedValue({ bookmark });
 
-        const result = await bookmarkController.createBookmark(bookmarkInput);
+        const result = await bookmarkController.createBookmark(
+          userId,
+          bookmarkInput,
+        );
 
         expect(bookmarkService.createBookmark).toHaveBeenCalledWith(
+          userId,
           bookmarkInput,
         );
         expect(result).toStrictEqual({ bookmark });

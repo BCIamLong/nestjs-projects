@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseIntPipe,
   Patch,
@@ -15,6 +17,7 @@ import { BookmarkServiceTest } from './bookmark-test.service';
 import { ParseIntPipeCustom } from 'src/common/pipes';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { LoggerService } from 'src/shared/logger/logger.service';
+import { GetUser } from 'src/auth/decorators';
 
 @ApiTags('bookmarks')
 @Controller('bookmarks')
@@ -59,8 +62,8 @@ export class BookmarkController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 500, description: 'Something went wrong' })
   @Post('')
-  createBookmark(@Body() dto: CreateBookmark) {
-    return this.bookmarkService.createBookmark(dto);
+  createBookmark(@GetUser('id') userId: number, @Body() dto: CreateBookmark) {
+    return this.bookmarkService.createBookmark(userId, dto);
   }
 
   @ApiOperation({ summary: 'update a bookmark' })
@@ -85,6 +88,7 @@ export class BookmarkController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 500, description: 'Something went wrong' })
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
   deleteBookmark(@Param('id', ParseIntPipe) id: number) {
     return this.bookmarkService.deleteBookmark(id);

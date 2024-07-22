@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateBookmark {
   @ApiProperty({
@@ -29,12 +29,12 @@ export class CreateBookmark {
   @IsString()
   description: string;
 
-  @ApiProperty({
-    name: 'userId',
-    type: Number,
-    default: 123,
-  })
-  @IsNotEmpty()
-  @IsNumber()
-  userId: number;
+  // @ApiProperty({
+  //   name: 'userId',
+  //   type: Number,
+  //   default: 123,
+  // })
+  // @IsNotEmpty()
+  // @IsNumber()
+  // userId: number;
 }

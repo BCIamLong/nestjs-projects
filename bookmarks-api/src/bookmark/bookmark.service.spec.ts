@@ -8,19 +8,18 @@ describe('BookmarkService', () => {
   let service: BookmarkService;
   let prisma: PrismaService;
   const bookmarkId = 12345;
+  const userId = 1;
 
   const invalidBookmarkInput = {
     title: '',
     description: 'Description',
     link: '',
-    userId: 0,
   };
 
   const bookmarkInput = {
     title: 'Test Bookmark',
     description: 'Description',
     link: 'link',
-    userId: 1,
   };
 
   const bookmark = {
@@ -106,7 +105,7 @@ describe('BookmarkService', () => {
           .mockRejectedValue(new BadRequestException('Invalid input'));
 
         try {
-          await service.createBookmark(invalidBookmarkInput);
+          await service.createBookmark(userId, invalidBookmarkInput);
         } catch (err) {
           expect(err.status).toBe(400);
           expect(prisma.bookmark.create).toHaveBeenCalled();
@@ -119,7 +118,7 @@ describe('BookmarkService', () => {
         jest.spyOn(prisma.bookmark, 'create').mockResolvedValue(bookmark);
 
         await expect(
-          service.createBookmark(bookmarkInput),
+          service.createBookmark(userId, bookmarkInput),
         ).resolves.toStrictEqual({ bookmark });
 
         expect(prisma.bookmark.create).toHaveBeenCalled();

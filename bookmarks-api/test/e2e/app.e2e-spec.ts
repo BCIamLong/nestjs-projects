@@ -6,7 +6,7 @@ import { AppModule } from 'src/app.module';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { bookmarkInput, loginDto, signupDto } from 'test/__mocks__';
 
-// * USER => SIGNUP => LOGIN => GET PROFILE => EDIT PROFILE => GO TO DASHBOARD OR SOMETHING => SEE EMPTY LIST OF BOOKMARKS =>  CREATE BOOKMARK => GET BOOKMARKS =>  GET SPECIFIC BOOKMARK => UPDATE USER'S BOOKMARK => DELETE USER'S BOOKMARK => LOGOUT
+// * USER => SIGNUP => LOGIN => GET PROFILE => EDIT PROFILE => GO TO DASHBOARD OR SOMETHING => SEE EMPTY LIST OF BOOKMARKS =>  CREATE BOOKMARK => GET BOOKMARKS =>  GET SPECIFIC BOOKMARK => UPDATE USER'S BOOKMARK => DELETE USER'S BOOKMARK => ACCESS TOKEN EXPIRES => GET REFRESH UPDATE ACCESS TOKEN => CONTINUE USE APP => LOGOUT
 
 // * https://pactumjs.github.io/api/requests
 
@@ -21,8 +21,8 @@ describe('App (e2e)', () => {
 
     prisma = moduleFixture.get<PrismaService>(PrismaService);
     app = moduleFixture.createNestApplication();
-    // * we don't want to write  .post('http://localhost:5000/auth/signup') in every test case right so let's set the base url and just write the path to the endpoint
-    // *  .post('http://localhost:5000/auth/signup') => post('/auth/signup')
+    // * we don't want to write  .post('http://localhost:5000/auth/signup1') in every test case right so let's set the base url and just write the path to the endpoint
+    // *  .post('http://localhost:5000/auth/signup1') => post('/auth/signup1')
     pactum.request.setBaseUrl('http://localhost:5000');
 
     // ! Notice that we just create app from app module and everything outside the app module like in main.ts file we create app from app module and then setup something for it
@@ -55,20 +55,20 @@ describe('App (e2e)', () => {
   describe('Auth', () => {
     describe('Signup', () => {
       it('should throw an error if input fields are empty', async () => {
-        await pactum.spec().post('/auth/signup').expectStatus(400);
+        await pactum.spec().post('/auth/signup1').expectStatus(400);
         // .inspect(); //* use inspect to inspect the info of request (header and body of request, response...)
       });
 
       it('should throw an error if the required input fields are empty', async () => {
         await pactum
           .spec()
-          .post('/auth/signup')
+          .post('/auth/signup1')
           .withBody({ ...signupDto, email: '' })
           .expectStatus(400);
 
         await pactum
           .spec()
-          .post('/auth/signup')
+          .post('/auth/signup1')
           .withBody({ ...signupDto, password: '' })
           .expectStatus(400);
       });
@@ -76,13 +76,13 @@ describe('App (e2e)', () => {
       it('should throw an error if input fields are invalid (invalid email, password...)', async () => {
         await pactum
           .spec()
-          .post('/auth/signup')
+          .post('/auth/signup1')
           .withBody({ ...signupDto, email: '123456' })
           .expectStatus(400);
 
         await pactum
           .spec()
-          .post('/auth/signup')
+          .post('/auth/signup1')
           .withBody({ ...signupDto, password: '12345678' }) //* in this case password is combined by numbers and text so we just write numbers for fail signup for this test case right
           // * if we have like regex for password we can write some invalid values not match that regex
           .expectStatus(400);
@@ -91,7 +91,7 @@ describe('App (e2e)', () => {
       it('should throw an error if confirm password is not match', async () => {
         await pactum
           .spec()
-          .post('/auth/signup')
+          .post('/auth/signup1')
           .withBody({ ...signupDto, passwordConfirm: 'invalid_pwd123' })
           .expectStatus(400);
       });
@@ -101,7 +101,7 @@ describe('App (e2e)', () => {
         let accessToken:string
         const { json: res } = await pactum
           .spec()
-          .post('/auth/signup')
+          .post('/auth/signup1')
           .withBody(signupDto)
           .toss();
         //* toss() execute the test and return response
@@ -119,10 +119,26 @@ describe('App (e2e)', () => {
         ------------------------------------*/
         await pactum
           .spec()
-          .post('/auth/signup')
+          .post('/auth/signup1')
           .withBody(signupDto)
           .expectStatus(201)
-          .stores('accessToken', 'token');
+          .stores('accessToken', 'token')
+          // .stores('refreshToken', '[set-cookie][1]')
+          .stores((req, res) => {
+            // console.log(res);
+            // console.log(res.headers['set-cookie'][1].split('=')[1]);
+            return {
+              // ! if we need to do some manipulate like in this case we want to split string or something like that we should use the stores with callback way because we can use JS like functions, utils... to calculate, manipulate... to get the data we want
+              // ! .stores('accessToken', 'token') the normal way so key -> path,value is just access to the value and assign to the key right but we have no way to manipulate and edit that value right
+              refreshToken: res.headers['set-cookie'][1]
+                .split(';')[0]
+                .split('=')[1],
+              // * because the value we get in headers is not format so i need to do this like above to the refresh token value
+            };
+          });
+        // .inspect(); //! if we use inspect that mean we end the process of the object chaining so that mean something we chain after will not execute therefore when we use inspect it should always at the end of the object chaining
+        // ! .inspect().stores() => FALSE
+        // ! .stores().inspect() => TRUE
         //* so we can store the token from the response body we get to the accessToken in the context object so like store to the accessToken variable
         //* so like this and we can reuse it in everywhere with pactum
       });
@@ -476,15 +492,47 @@ describe('App (e2e)', () => {
     });
   });
 
+  // * CONSIDER THE SITUATION LIKE: THE ACCESS TOKEN EXPIRES AND NEED TO SEND REQUEST TO REFRESH ENDPOINT TO UPDATE ACCESS TOKEN AND CONTINUE USE THE APP
+
   describe('Auth', () => {
+    describe('Refresh', () => {
+      it('should throw an error if access token invalid (expires, invalid....)', async () => {
+        await pactum
+          .spec()
+          .get('/auth/logout')
+          .withBearerToken('invalid_access_token')
+          .expectStatus(401)
+          .expectBodyContains('message');
+      });
+
+      it('should throw an error if refresh token is invalid (expires, invalid....)', async () => {
+        await pactum
+          .spec()
+          .get('/auth/refresh')
+          .withBearerToken('invalid_refresh_token')
+          .expectStatus(401)
+          .expectBodyContains('message');
+      });
+
+      it('should update the access token', async () => {
+        await pactum
+          .spec()
+          .get('/auth/refresh')
+          .withBearerToken('$S{refreshToken}')
+          .expectStatus(200)
+          .expectBodyContains('token')
+          .stores('accessToken', 'token');
+      });
+    });
+
     describe('Logout', () => {
       it('should logout user', async () => {
         await pactum
           .spec()
           .get('/auth/logout')
           .withBearerToken('$S{accessToken}')
-          .expectStatus(200)
-          .inspect();
+          .expectStatus(200);
+        // .inspect();
       });
     });
   });

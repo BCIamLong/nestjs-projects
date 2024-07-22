@@ -133,7 +133,7 @@ describe('App (e2e)', () => {
               refreshToken: res.headers['set-cookie'][1]
                 .split(';')[0]
                 .split('=')[1],
-              // * because the value we get in headers is not format so i need to do this like above to the refresh token value
+              // * because the value we get in headers is not format so i need to do this like above to get the refresh token value
             };
           });
         // .inspect(); //! if we use inspect that mean we end the process of the object chaining so that mean something we chain after will not execute therefore when we use inspect it should always at the end of the object chaining
@@ -488,6 +488,16 @@ describe('App (e2e)', () => {
           .withBearerToken('$S{accessToken}')
           .expectStatus(204)
           .expectBody(null);
+      });
+
+      it('should get an empty list of bookmarks', async () => {
+        await pactum
+          .spec()
+          .get('/bookmarks')
+          .withBearerToken('$S{accessToken}')
+          .expectStatus(200)
+          .expectBodyContains('data')
+          .expectBodyContains([]);
       });
     });
   });

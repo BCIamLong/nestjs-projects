@@ -43,6 +43,7 @@ export class BookmarkController {
     return this.bookmarkService.getBookmarks();
   }
 
+  // * use CacheInterceptor as local
   @UseInterceptors(CacheInterceptor)
   @ApiOperation({ summary: 'get a specific bookmark' })
   @ApiParam({ name: 'id', type: Number })

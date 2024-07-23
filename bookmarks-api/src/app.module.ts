@@ -27,7 +27,7 @@ import {
   ThrottlerModule,
   ThrottlerModuleOptions,
 } from '@nestjs/throttler';
-import { CacheInterceptor } from '@nestjs/cache-manager';
+// import { CacheInterceptor } from '@nestjs/cache-manager';
 // import { EventEmitterModule } from '@nestjs/event-emitter';
 // import { MailerModule, MailerOptions } from '@nestjs-modules/mailer';
 
@@ -87,10 +87,12 @@ import { CacheInterceptor } from '@nestjs/cache-manager';
     // * for global interceptor use in main.ts we use use it for like logger or maybe if we have more service and not only our app and we have interceptors for that then we can apply global as i did before right
     { provide: APP_GUARD, useClass: AccessTokenGuard },
     { provide: APP_FILTER, useClass: AllExceptionFilter },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: CacheInterceptor,
-    },
+    // {
+    // ! this is just set up the CacheInterceptor at global so it will cache every routes (only get method)
+    // * if we want to use one then just use @UserInterceptors(CacheInterceptor) to the route level, or the controller level... for local usage
+    //   provide: APP_INTERCEPTOR,
+    //   useClass: CacheInterceptor,
+    // },
   ],
 })
 export class AppModule implements NestModule {

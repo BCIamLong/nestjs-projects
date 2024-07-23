@@ -70,5 +70,6 @@ import { RedisService } from './redis.service';
   // * therefore we need to export it also to use something like CacheInterceptor..., because if we don't do it we will catch the error that's we don't have CACHE_MANAGER basically reference to the CacheModule
   // * this like we do CacheModule.registerAsync() in the app module but now we do this setup right here then just export it to the shared global module which is imports to app module and it will work just well
   exports: [RedisService, CacheModule],
+  // ! the important thing is the above
 })
 export class RedisModule {}

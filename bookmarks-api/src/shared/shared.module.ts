@@ -5,6 +5,7 @@ import { EventModule } from './event/event.module';
 import { LoggerModule } from './logger/logger.module';
 import { Stripe1Module } from './stripe1/stripe1.module';
 import { StripeModule } from './stripe/stripe.module';
+import { RedisModule } from './redis/redis.module';
 
 @Global()
 @Module({
@@ -16,8 +17,9 @@ import { StripeModule } from './stripe/stripe.module';
     AppMailerModule,
     EventModule,
     LoggerModule,
+    RedisModule,
   ],
   providers: [AccessControlService],
-  exports: [AccessControlService, AppMailerModule, LoggerModule],
+  exports: [AccessControlService, AppMailerModule, LoggerModule, RedisModule],
 })
 export class SharedModule {}

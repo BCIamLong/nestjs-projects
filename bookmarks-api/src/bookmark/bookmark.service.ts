@@ -6,14 +6,22 @@ import {
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateBookmark, UpdateBookmark } from './dto';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { RedisService } from 'src/shared/redis/redis.service';
 
 @Injectable()
 export class BookmarkService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly redisService: RedisService,
+  ) {}
 
   async getBookmarks() {
     const bookmarks = await this.prisma.bookmark.findMany();
+    const cachedValue = await this.redisService.get('bookmarks');
+    if (cachedValue) return { bookmarks: cachedValue };
+    await this.redisService.set('bookmarks', bookmarks);
 
+    console.log('Caching.....................');
     // * because i use the global response interceptor and it will format the response object for us
     // * and then we just return this object with the data like this
     // * https://docs.nestjs.com/interceptors

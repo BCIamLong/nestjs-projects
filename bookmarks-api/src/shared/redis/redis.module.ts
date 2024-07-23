@@ -1,8 +1,13 @@
-import { CacheModule, CacheStore } from '@nestjs/cache-manager';
+import {
+  // CacheInterceptor,
+  CacheModule,
+  CacheStore,
+} from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { redisStore } from 'cache-manager-redis-store';
 import { RedisService } from './redis.service';
+// import { APP_INTERCEPTOR } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -51,7 +56,19 @@ import { RedisService } from './redis.service';
       inject: [ConfigService],
     }),
   ],
-  providers: [RedisService],
-  exports: [RedisService],
+  providers: [
+    RedisService,
+    // {
+    // * of course we can use this right here because we will import this to the shared module which is the global module we will import to the app module
+    // ! but we should use this in our app for more readable right
+    //   provide: APP_INTERCEPTOR,
+    //   useClass: CacheInterceptor,
+    // },
+  ],
+  // ! we need to export cache module here why?
+  // ! because if we want to use CacheInterceptor we need the cache module setup but now if we don't explore then this setup only work in this range of the redis module not for other modules right
+  // * therefore we need to export it also to use something like CacheInterceptor..., because if we don't do it we will catch the error that's we don't have CACHE_MANAGER basically reference to the CacheModule
+  // * this like we do CacheModule.registerAsync() in the app module but now we do this setup right here then just export it to the shared global module which is imports to app module and it will work just well
+  exports: [RedisService, CacheModule],
 })
 export class RedisModule {}

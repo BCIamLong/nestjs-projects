@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  UseInterceptors,
 } from '@nestjs/common';
 import { BookmarkService } from './bookmark.service';
 import { CreateBookmark, UpdateBookmark } from './dto';
@@ -18,6 +19,7 @@ import { ParseIntPipeCustom } from 'src/common/pipes';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { LoggerService } from 'src/shared/logger/logger.service';
 import { GetUser } from 'src/auth/decorators';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 
 @ApiTags('bookmarks')
 @Controller('bookmarks')
@@ -41,6 +43,7 @@ export class BookmarkController {
     return this.bookmarkService.getBookmarks();
   }
 
+  @UseInterceptors(CacheInterceptor)
   @ApiOperation({ summary: 'get a specific bookmark' })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({ status: 200, description: 'Success' })
@@ -51,6 +54,7 @@ export class BookmarkController {
   // * in this case we just use param and it's one value right and we do not need to convert it to DTO so we just use the ParseIntPipe built-in pipe so it's good in this case right
   // * https://docs.google.com/document/d/1y9f8kwle4hT-2l7XoJyzPEGDZ8K26dueDZO0yZTuRHA/edit
   getBookmark(@Param('id', ParseIntPipeCustom) id: number) {
+    console.log('Caching...............');
     // return this.bookmarkTestService.findOne(id);
     return this.bookmarkService.getBookmark(id);
   }
